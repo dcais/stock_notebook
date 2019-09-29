@@ -83,6 +83,9 @@ class Stock:
 
         dailyDatas = docs.fetch_all()
 
+        if len(dailyDatas) == 0:
+            return None
+
         variables = dailyDatas[0].keys()
         names = []
         for v in variables:

@@ -14,6 +14,8 @@ class FirstStrategy:
     def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[99, 145]):
         self.stock_info = stock.get_stock_info(stock_keyword)
         df = stock.get_daily_data(stock_keyword, start_date, end_date)
+        if df is None:
+            return
         df['sar'] = talib.SAR(df.high, df.low, acceleration=0.1, maximum=2)
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
         for period in sma_periods:
@@ -24,11 +26,17 @@ class FirstStrategy:
 
     def simulate(self, start_date, end_date='', init_amount=100000, account_risk=0.01, stop_price_factor=2.5,
                  max_add_count=4):
+        if self.df is None:
+            return None
+
         df = self.df.copy()
         if end_date == '':
             df = df.loc[start_date:]
         else:
             df = df.loc[start_date:end_date]
+
+        if len(df) == 0 :
+            return None
 
         df.loc[:, 'signal'] = np.array([''] * len(df))
         df.loc[:, 'account'] = np.array([float(0)] * len(df))
