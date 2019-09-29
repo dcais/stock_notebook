@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import mysqlx
 import json
+from os.path import abspath, join, dirname
 
 connection_string = {
 }
@@ -27,7 +28,10 @@ class Stock:
         self.pro = ts.pro_api()
         df = self.pro.stock_basic(exchange='', list_status='L')
         self.stock_df = df
-        with open('../config.json') as json_file:
+
+        config_path = join(abspath(dirname(__file__)), '../config.json')
+
+        with open(config_path) as json_file:
             connection_string = json.load(json_file)
             print(connection_string)
         self.x_client = mysqlx.get_client(connection_string, client_options)
