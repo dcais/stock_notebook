@@ -47,7 +47,6 @@ for i, row in stock.stock_df.iterrows():
         df = simulate(symbol,g_ret_df)
         if df is not None:
             g_ret_df = df;
-        print(g_ret_df)
     except :
         print ("Error: "+symbol+"失败")
     else:
