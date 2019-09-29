@@ -32,5 +32,6 @@ for i, row in stock.stock_df.iterrows():
          'profit_max': profit_max,
          'profit_min': profit_min
          }, ignore_index=True)
+    print ("start simulate "+ row['symbol']+"finished, profit"+str(profit))
 
 ret_df.to_excel("summary.xlsx");
