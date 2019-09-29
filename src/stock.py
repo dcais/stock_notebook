@@ -2,12 +2,9 @@ import tushare as ts
 import pandas as pd
 import re
 import mysqlx
+import json
 
 connection_string = {
-    'host': 'localhost',
-    'port': 33160,
-    'user': 'stock',
-    'password': 'aRmbZH9dx9k6TzRB'
 }
 
 client_options = {
@@ -30,6 +27,9 @@ class Stock:
         self.pro = ts.pro_api()
         df = self.pro.stock_basic(exchange='', list_status='L')
         self.stock_df = df
+        with open('../config.json') as json_file:
+            connection_string = json.load(json_file)
+            print(connection_string)
         self.x_client = mysqlx.get_client(connection_string, client_options)
 
     def get_schema(self):
