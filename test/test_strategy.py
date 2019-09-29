@@ -1,10 +1,10 @@
 import sys
 from os.path import abspath, join, dirname
 import pandas as pd
-sys.path.insert(0, join(abspath(dirname(__file__)), '../src'))
+sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 
-from stock import Stock
-from strategy import FirstStrategy
+from src.stock import Stock
+from src.strategy import FirstStrategy
 
 stock = Stock()
 init_amount = 100000
@@ -48,8 +48,8 @@ for i, row in stock.stock_df.iterrows():
         if df is not None:
             g_ret_df = df;
         print(g_ret_df)
-    except:
-        print ("Error: "+symbol+"fail")
+    except :
+        print ("Error: "+symbol+"失败")
     else:
         pass
 
