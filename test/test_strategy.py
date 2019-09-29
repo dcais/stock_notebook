@@ -48,8 +48,8 @@ for i, row in stock.stock_df.iterrows():
         if df is not None:
             g_ret_df = df;
         print(g_ret_df)
-    except :
-        print ("Error: "+symbol+"失败")
+    except:
+        print ("Error: "+symbol+"fail")
     else:
         pass
 
