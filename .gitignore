@@ -1,2 +1,5 @@
 .ipynb_checkpoints
 .history
+.idea
+src/__pycache__/
+
