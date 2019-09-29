@@ -22,6 +22,7 @@ def convert_to_underline(name):
 class Stock:
     token = '36d50a0386e9066b5c79c2de58ea2d3a9b980020041adc910f76bfc7'
     x_client = None
+    stock_df = None
 
     def __init__(self):
         ts.set_token(Stock.token)
@@ -33,7 +34,7 @@ class Stock:
 
         with open(config_path) as json_file:
             connection_string = json.load(json_file)
-            print(connection_string)
+            # print(connection_string)
         self.x_client = mysqlx.get_client(connection_string, client_options)
 
     def get_schema(self):
@@ -86,7 +87,7 @@ class Stock:
         names = []
         for v in variables:
             names.append(convert_to_underline(v))
-        print(names)
+        # print(names)
         df = pd.DataFrame([[getattr(i, j) for j in variables] for i in dailyDatas], columns=names)
         df = df[['trade_date','ts_code','low','vol','high','open','pre_close','close','amount','pct_chg']]
         df['trade_date'] = df.trade_date.str[:10]
