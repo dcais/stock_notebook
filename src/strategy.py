@@ -57,7 +57,7 @@ class FirstStrategy:
         df.loc[:, 'add_price'] = np.array([float(0)] * len(df))
         df.loc[:, 'buy_count'] = np.array([float(0)] * len(df))
 
-        r_df = df.apply(self.run_strategy,axis=1,args =(start_date,end_date, init_amount, stop_price_factor , account_risk,max_add_count))
+        r_df = df.apply(self.run_strategy,axis=1,args =(start_date,end_date, init_amount, account_risk , stop_price_factor,  max_add_count))
         return r_df
 
     def stragyty_determine_buy_signal_1(self,prev, cur):
@@ -84,7 +84,7 @@ class FirstStrategy:
 
         signal = self.stragyty_determine_buy_signal_1(prev, cur)
 
-        if prev['signal'] == 'pre_buy':
+        if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
             # 以开盘价买入
             unit_price = cur['open']
@@ -115,12 +115,13 @@ class FirstStrategy:
 
             if prev['account'] < unit_price * unit or unit == 0:
                 add = False
-                signal = None
-                unit = 0;
-                unit_price = 0;
-                unit_cost = 0;
-                stop_price = None
-                add_price = 0;
+                signal = ""
+                action = ""
+                unit = 0
+                unit_price = 0
+                unit_cost = 0
+                stop_price = 0
+                add_price = 0
             else:
                 cur['buy_count'] = buy_count
         else:
@@ -198,7 +199,7 @@ class FirstStrategy:
 
         signal,action, unit, unit_price,\
         unit_cost, stop_price, R,\
-        add_price, add = self.stragyty_calc_buy(prev, cur, init_amount,stop_price_factor,account_risk, max_add_count)
+        add_price, add = self.stragyty_calc_buy(prev, cur, init_amount,account_risk,stop_price_factor, max_add_count)
         if signal is not None:
             cur['signal'] = signal
         if action is not None:
@@ -243,7 +244,7 @@ class FirstStrategy:
         else:
             cur['unit_high'] = 0
 
-        if cur['action'] != "buy" or add:
+        if cur['unit_account'] > 0 and ( cur['action'] != "buy" or add ):
             cur['stop_price'] = cur['unit_high'] - cur['ATR'] * stop_price_factor
 
         cur['account'] = prev['account'] - cur['unit'] * cur['unit_price']
