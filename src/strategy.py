@@ -141,13 +141,7 @@ class FirstStrategy:
             #         if stop_price > prev['close']:
             stop_price = prev['stop_price']
             # 铁定要卖出
-            if stop_price > prev['close']:
-                pass
-            #             signal = 'sell'
-            #             unit = 0 - prev['unit_account']
-            #             unit_price =cur['open']
-
-            elif cur['low'] < stop_price:
+            if cur['low'] < stop_price:
                 action = 'sell'
                 unit = 0 - prev['unit_account']
 

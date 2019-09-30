@@ -12,7 +12,7 @@ init_amount = 100000
 
 ret_df = pd.DataFrame(columns=['symbol','balance','balance_max','balance_min','profit','profit_max','profit_min'])
 
-stragety = FirstStrategy(stock, '000576', start_date="2012-01-01")
+stragety = FirstStrategy(stock, '601700', start_date="2012-01-01")
 df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount,stop_price_factor=2.5)
 
