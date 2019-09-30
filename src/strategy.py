@@ -18,6 +18,7 @@ class FirstStrategy:
             return
         df['sar'] = talib.SAR(df.high, df.low, acceleration=0.1, maximum=2)
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
+        df['macd_dif'], df['macd_dem'], df['macd_ocr'] = talib.MACD(df.close, 12, 26, 9)
         for period in sma_periods:
             name = "SMA" + str(period)
             sma = talib.SMA(np.array(df.close), period)

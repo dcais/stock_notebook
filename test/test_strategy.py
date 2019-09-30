@@ -20,7 +20,9 @@ def simulate(symbol):
     logging.info("start simulate " + symbol)
     stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
     df = stragety.simulate(start_date="20180101",
-                           init_amount=init_amount)
+                           init_amount=init_amount,
+                           max_add_cnt= max_add_cnt
+                           )
 
     rdf = None
     if df is not None:
@@ -54,11 +56,13 @@ def simu_callback(future):
 if __name__ == '__main__':
     stock = Stock()
     init_amount = 100000
-    worker_cnt = 2;
+    worker_cnt = 2
+    max_add_cnt = 4
     if len(sys.argv) >= 2:
         worker_cnt = int(sys.argv[1])
-
-    print("worker count = %s" % worker_cnt)
+    if len(sys.argv) >=3
+        max_add_cnt = int(sys.argv[2])
+    print("worker count = %s, max add count %s" % (worker_cnt,max_add_cnt))
     df = get_blank_df()
     with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
         ft_map = {executor.submit(simulate, row['symbol']): row['symbol'] for i, row in stock.stock_df.iterrows()}

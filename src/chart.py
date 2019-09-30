@@ -2,7 +2,7 @@ import pandas as pd
 from pyecharts import options as opts
 from pyecharts.globals import *
 from pyecharts.charts import *
-
+import numpy as np
 
 class Chart:
     colors = [
@@ -97,7 +97,7 @@ class Chart:
                 visualmap_opts=opts.VisualMapOpts(
                     is_show=True,
                     dimension=2,
-                    series_index=[5, 6, 7, 8, 9, 10],
+                    series_index=[5, 6, 7, 8, 9, 10,11,12],
                     is_piecewise=True,
                     pieces=[
                         {"value": 1, "color": "#ff7f74"},
@@ -381,3 +381,64 @@ class Chart:
         )
         line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
         return line
+
+    def get_line_ba(self,df, init_account, stock_info):
+        trade_dates = np.array(df.trade_date).tolist()
+        balances = np.array((df['balance'] - init_account) / init_account).tolist()
+        c = (
+            Line()
+                .add_xaxis(trade_dates)
+                .add_yaxis("p"
+                           , balances
+                           , is_smooth=True,
+                           is_hover_animation=False,
+                           linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                           label_opts=opts.LabelOpts(is_show=False),
+                           )
+                .set_global_opts(
+                title_opts=opts.TitleOpts(title=stock_info['name'],subtitle=stock_info['symbol']),
+                xaxis_opts=opts.AxisOpts(
+                    is_scale=True,
+                    type_="category",
+                    splitarea_opts=opts.SplitAreaOpts(
+                        is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+                    ),
+                ),
+                yaxis_opts=opts.AxisOpts(
+                    is_scale=True,
+                    splitarea_opts=opts.SplitAreaOpts(
+                        is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+                    ),
+                ),
+                datazoom_opts=[
+                    opts.DataZoomOpts(
+                        is_show=True,
+                        # xaxis_index=[0],
+                        type_="slider",
+                        # pos_top="90%",
+                        range_start=0,
+                        range_end=100,
+                    ),
+                    #                 opts.DataZoomOpts(
+                    #                     is_show=True,
+                    #                     yaxis_index=[0],
+                    #                     type_="slider",
+                    #                     orient = 'vertical',
+                    # #                     pos_top="90%",
+                    #                     pos_right="0%",
+                    #                     range_start=0,
+                    #                     range_end=100,
+                    #                 ),
+                ],
+                tooltip_opts=opts.TooltipOpts(
+                    trigger="axis",
+                    axis_pointer_type="cross",
+                    background_color="rgba(245, 245, 245, 0.8)",
+                    border_width=1,
+                    border_color="#ccc",
+                    textstyle_opts=opts.TextStyleOpts(color="#000"),
+                ),
+            )
+        )
+        return c
+
