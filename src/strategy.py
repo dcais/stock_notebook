@@ -10,8 +10,9 @@ class FirstStrategy:
     df = None
     stock_info = None
     prev = None
+    last_buy_price = 0
 
-    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[99, 145]):
+    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 99, 145,318,453]):
         self.stock_info = stock.get_stock_info(stock_keyword)
         df = stock.get_daily_data(stock_keyword, start_date, end_date)
         if df is None:
@@ -73,6 +74,35 @@ class FirstStrategy:
             signal = 'pre_buy'
         return signal;
 
+    def stragyty_determine_buy_signal_2(self,prev, cur):
+        signal = ""
+        sma_f = 'SMA99'
+        sma_s = 'SMA145'
+
+        sma_g_f = 'SMA17'
+        sma_g_s = 'SMA25'
+
+        cond2 = cur[sma_f] > cur[sma_s]  # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
+        cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
+        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar']
+        # cond_macd = cur[''macd_ocr] > 0
+
+        if cond1 and ( cond2 or cond3 ) and prev['unit_account'] == 0:
+            signal = 'pre_buy'
+        return signal;
+
+    def stragyty_determine_buy_signal_3(self,prev, cur):
+        signal = ""
+        sma_g_f = 'SMA17'
+        sma_g_s = 'SMA25'
+
+        cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
+        cond1 = cur['unit_account'] == 0
+        # cond_macd = cur[''macd_ocr] > 0
+        if cond1 and cond3 and prev['unit_account'] == 0:
+            signal = 'pre_buy'
+        return signal;
+
     def stragyty_calc_buy(self, prev, cur, init_account, account_risk, stop_atr_factor, max_add_count=0):
         signal = None
         action = ''
@@ -83,7 +113,7 @@ class FirstStrategy:
         add_cond1 = prev['unit_account'] > 0 and prev['add_price'] < cur['high'] and prev['add_price'] > 0
         # and_cond2 = prev['sar_stop_price'] < prev['close']
 
-        signal = self.stragyty_determine_buy_signal_1(prev, cur)
+        signal = self.stragyty_determine_buy_signal_3(prev, cur)
 
         if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
@@ -102,7 +132,6 @@ class FirstStrategy:
         if action == 'buy':
             buy_count = prev['buy_count'] + 1
             stop_price = unit_price - stop_atr_factor * cur['ATR']
-
             if add:
                 R = prev['R']
                 tmpR = unit_price - stop_price
@@ -206,10 +235,7 @@ class FirstStrategy:
             cur['unit_cost'] = unit_cost
             cur['stop_price'] = stop_price
             cur['R'] = R
-
-        cur['add_price'] = add_price
-        if cur['add_price'] == 0:
-            cur['add_price'] = prev['add_price']
+            self.last_buy_price = unit_price
 
         signal, action, unit, unit_price = self.stragyty_calc_sell(prev, cur)
 
@@ -222,6 +248,10 @@ class FirstStrategy:
             cur['unit_price'] = unit_price
             cur['add_price'] = 0
             cur['buy_count'] = 0
+            self.last_buy_price = 0
+
+        if self.last_buy_price > 0:
+            cur['add_price'] = self.last_buy_price + 0.5 * prev['ATR']
 
         cur['unit_account'] = prev['unit_account'] + cur['unit']
         unit_cost, R, P, PdR = self.stragyty_calc_pr(prev, cur)
