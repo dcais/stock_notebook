@@ -2,7 +2,9 @@ import sys
 import concurrent.futures
 from os.path import abspath, join, dirname
 import pandas as pd
+import logging
 
+logging.basicConfig(level=logging.INFO)
 sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 
 from src.stock import Stock
@@ -15,7 +17,7 @@ def get_blank_df():
 
 
 def simulate(symbol):
-    print("start simulate " + symbol)
+    logging.info("start simulate " + symbol)
     stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
     df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount)
@@ -65,14 +67,14 @@ if __name__ == '__main__':
             try:
                 df_i = future.result()
                 if df_i is not None:
-                    print("simulate %s finished, profit %f" % (symbol, df_i['profit'][0]))
+                    logging.info("simulate %s finished, profit %f" % (symbol, df_i['profit'][0]))
                     df = df.append(df_i)
                 else:
-                    print("simulate %s finished, the result is None",symbol)
+                    logging.info("simulate %s finished, the result is None", symbol)
 
             except Exception as exc:
-                print(' generated an exception: %s' % exc)
+                logging.error('%s generated an exception: %s' % (symbol, exc))
             else:
                 pass
 
-    df.to_excel("summary.xlsx");
+    df.to_excel("summary.xlsx")
