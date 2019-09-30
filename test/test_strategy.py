@@ -60,7 +60,7 @@ if __name__ == '__main__':
     max_add_cnt = 4
     if len(sys.argv) >= 2:
         worker_cnt = int(sys.argv[1])
-    if len(sys.argv) >=3
+    if len(sys.argv) >=3:
         max_add_cnt = int(sys.argv[2])
     print("worker count = %s, max add count %s" % (worker_cnt,max_add_cnt))
     df = get_blank_df()
