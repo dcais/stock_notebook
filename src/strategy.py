@@ -82,7 +82,7 @@ class FirstStrategy:
         sma_g_f = 'SMA17'
         sma_g_s = 'SMA25'
 
-        cond2 = cur[sma_f] > cur[sma_s] and cur['close'] > cur[sma_f] # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
+        cond2 = cur[sma_f] > prev[sma_s] and cur['close'] > cur[sma_f] # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
         cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
         cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar']
         # cond_macd = cur[''macd_ocr] > 0
