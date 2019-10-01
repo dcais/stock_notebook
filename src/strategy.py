@@ -12,7 +12,7 @@ class FirstStrategy:
     prev = None
     last_buy_price = 0
 
-    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 99, 145,318,453]):
+    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 50, 99, 145,318,453]):
         self.stock_info = stock.get_stock_info(stock_keyword)
         df = stock.get_daily_data(stock_keyword, start_date, end_date)
         if df is None:
@@ -76,16 +76,17 @@ class FirstStrategy:
 
     def stragyty_determine_buy_signal_2(self,prev, cur):
         signal = ""
-        sma_f = 'SMA99'
-        sma_s = 'SMA145'
+        sma_f = 'SMA50'
+        sma_s = 'SMA99'
 
         sma_g_f = 'SMA17'
         sma_g_s = 'SMA25'
 
-        cond2 = cur[sma_f] > cur[sma_s]  # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
+        cond2 = cur[sma_f] > cur[sma_s] and cur['close'] > cur[sma_f] # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
         cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
         cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar']
         # cond_macd = cur[''macd_ocr] > 0
+
 
         if cond1 and ( cond2 or cond3 ) and prev['unit_account'] == 0:
             signal = 'pre_buy'
@@ -95,11 +96,13 @@ class FirstStrategy:
         signal = ""
         sma_g_f = 'SMA17'
         sma_g_s = 'SMA25'
+        sma_g_ss = 'SMA50'
 
         cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
+        cond2 = cur[sma_g_f] > cur[sma_g_ss]
         cond1 = cur['unit_account'] == 0
         # cond_macd = cur[''macd_ocr] > 0
-        if cond1 and cond3 and prev['unit_account'] == 0:
+        if cond1 and cond2 and cond3 and prev['unit_account'] == 0:
             signal = 'pre_buy'
         return signal;
 
@@ -113,7 +116,7 @@ class FirstStrategy:
         add_cond1 = prev['unit_account'] > 0 and prev['add_price'] < cur['high'] and prev['add_price'] > 0
         # and_cond2 = prev['sar_stop_price'] < prev['close']
 
-        signal = self.stragyty_determine_buy_signal_3(prev, cur)
+        signal = self.stragyty_determine_buy_signal_2(prev, cur)
 
         if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
