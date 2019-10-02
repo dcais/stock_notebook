@@ -65,6 +65,10 @@ def get_finance_income_df(ts_code):
         .bind(params) \
         .execute()
     dailyDatas = docs.fetch_all()
+
+    session.close()
+    x_client.close()
+
     if len(dailyDatas) == 0:
         return None
 
