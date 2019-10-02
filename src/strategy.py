@@ -12,7 +12,7 @@ class FirstStrategy:
     prev = None
     last_buy_price = 0
 
-    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 50, 99, 145,318,453]):
+    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 43, 99, 145,318,453]):
         self.stock_info = stock.get_stock_info(stock_keyword)
         df = stock.get_daily_data(stock_keyword, start_date, end_date)
         if df is None:
@@ -76,7 +76,7 @@ class FirstStrategy:
 
     def stragyty_determine_buy_signal_2(self,prev, cur):
         signal = ""
-        sma_f = 'SMA50'
+        sma_f = 'SMA43'
         sma_s = 'SMA99'
 
         sma_g_f = 'SMA17'
@@ -96,7 +96,7 @@ class FirstStrategy:
         signal = ""
         sma_g_f = 'SMA17'
         sma_g_s = 'SMA25'
-        sma_g_ss = 'SMA50'
+        sma_g_ss = 'SMA43'
 
         cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
         cond2 = cur[sma_g_f] > cur[sma_g_ss]
