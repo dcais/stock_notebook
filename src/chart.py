@@ -131,12 +131,50 @@ class Chart:
                 symbol="none",
                 is_smooth=True,
                 is_hover_animation=False,
-                linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                linestyle_opts=opts.LineStyleOpts(width=1.5, opacity=0.9),
                 label_opts=opts.LabelOpts(is_show=False),
                 itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[i]),
             )
             i += 1
 
+        line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
+        return line
+
+    def get_bol_line(self, bol):
+        xdatas = bol.trade_date.to_numpy().tolist()
+        line = Line()
+        line.add_xaxis(xaxis_data=xdatas)
+
+        line.add_yaxis(
+            series_name="bol_up",
+            y_axis=bol['bol_up'].to_numpy().round(2).tolist(),
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[20]),
+        )
+        line.add_yaxis(
+            series_name="bol_mid",
+            y_axis=bol['bol_mi'].to_numpy().round(2).tolist(),
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[21]),
+        )
+        line.add_yaxis(
+            series_name="bol_low",
+            y_axis=bol['bol_lo'].to_numpy().round(2).tolist(),
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[22]),
+        )
         line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
         return line
 
@@ -240,9 +278,16 @@ class Chart:
         )
         return esSar
 
-    def get_grid(self, stock_info, xdatas, kdatas, linetec_dic, vols, sar=None, bs=None, df_stop_price=None):
+    def get_grid(self, stock_info, xdatas, kdatas, vols,
+                 ma_dic=None,
+                 sar=None,
+                 bs=None,
+                 df_stop_price=None,
+                 bol= None
+                 ):
         kline = self.get_kline(xdatas, kdatas, stock_info)
-        line = self.get_line(xdatas, linetec_dic)
+
+
         bar = self.get_volome(xdatas, vols, kdatas)
 
         if sar is not None:
@@ -262,7 +307,14 @@ class Chart:
             stop_p = self.get_stop_price_chart(df_stop_price)
             kline.overlap(stop_p)
 
-        overlap_kline_line = kline.overlap(line)
+        if bol is not None:
+            bol_line = self.get_bol_line(bol)
+            kline.overlap(bol_line)
+
+        if ma_dic is not None:
+            line = self.get_line(xdatas, ma_dic)
+            kline = kline.overlap(line)
+
         grid_chart = Grid(
             init_opts=opts.InitOpts(
                 width="900px",
@@ -270,7 +322,7 @@ class Chart:
             )
         )
         grid_chart.add(
-            overlap_kline_line,
+            kline,
             grid_opts=opts.GridOpts(pos_left="6%", pos_right="8%", height="55%"),
         )
 

@@ -58,6 +58,7 @@ class FirstStrategy:
         df.loc[:, 'P/R'] = np.array([float(0)] * len(df))
         df.loc[:, 'add_price'] = np.array([float(0)] * len(df))
         df.loc[:, 'buy_count'] = np.array([float(0)] * len(df))
+        df.loc[:, 'unit_day'] = np.array([float(0)] * len(df))
 
         r_df = df.apply(self.run_strategy,axis=1,args =(start_date,end_date, init_amount, account_risk , stop_price_factor,  max_add_count))
         return r_df
@@ -67,7 +68,7 @@ class FirstStrategy:
         sma_f = 'SMA99'
         sma_s = 'SMA145'
         cond2 = cur[sma_f] > cur[sma_s]  # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
-        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar']
+        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar'] and prev['sar'] > prev['close']
         # cond_macd = cur[''macd_ocr] > 0
 
         if cond1 and cond2 and prev['unit_account'] == 0:
@@ -84,7 +85,7 @@ class FirstStrategy:
 
         cond2 = cur[sma_f] > prev[sma_s] and cur['close'] > cur[sma_f] # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
         cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
-        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar']
+        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar'] and prev['sar'] > prev['close']
         # cond_macd = cur[''macd_ocr] > 0
 
 
@@ -106,6 +107,20 @@ class FirstStrategy:
             signal = 'pre_buy'
         return signal;
 
+    def stragyty_determine_buy_signal_4(self,prev, cur):
+        signal = ""
+        sma_g_f = 'SMA17'
+        sma_g_s = 'SMA25'
+        sma_g_ss = 'SMA43'
+
+        cond3 = cur[sma_g_f] > cur[sma_g_s]  and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]
+        # cond2 = cur[sma_g_f] > cur[sma_g_ss]
+        cond1 = cur['unit_account'] == 0
+        # cond_macd = cur[''macd_ocr] > 0
+        if cond1 and cond3 and prev['unit_account'] == 0:
+            signal = 'pre_buy'
+        return signal;
+
     def stragyty_calc_buy(self, prev, cur, init_account, account_risk, stop_atr_factor, max_add_count=0):
         signal = None
         action = ''
@@ -116,21 +131,28 @@ class FirstStrategy:
         add_cond1 = prev['unit_account'] > 0 and prev['add_price'] < cur['high'] and prev['add_price'] > 0
         # and_cond2 = prev['sar_stop_price'] < prev['close']
 
-        signal = self.stragyty_determine_buy_signal_2(prev, cur)
+        signal = self.stragyty_determine_buy_signal_1(prev, cur)
 
         if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
             # 以开盘价买入
             unit_price = cur['open']
+            # if cur['open'] < prev['SMA17']:
+            #     unit_price = cur['open']
+            # elif cur['low'] > prev['SMA17']:
+            #     unit_price = cur['close']
+            # else:
+            #     unit_price = prev['SMA17']
 
 
         elif add_cond1 and prev['buy_count'] < max_add_count:
             action = 'buy'
             add = True
-            if cur['add_price'] < cur['low']:
+            if prev['add_price'] < cur['low']:
                 unit_price = cur['open']
             else:
                 unit_price = prev['add_price']
+
 
         if action == 'buy':
             buy_count = prev['buy_count'] + 1
@@ -254,7 +276,7 @@ class FirstStrategy:
             self.last_buy_price = 0
 
         if self.last_buy_price > 0:
-            cur['add_price'] = self.last_buy_price + 0.5 * prev['ATR']
+            cur['add_price'] = self.last_buy_price + 0.5 * cur['ATR']
 
         cur['unit_account'] = prev['unit_account'] + cur['unit']
         unit_cost, R, P, PdR = self.stragyty_calc_pr(prev, cur)
@@ -265,15 +287,22 @@ class FirstStrategy:
             cur['P/R'] = PdR
 
         if cur['unit_account'] > 0:
+            cur['unit_day'] = prev['unit_day'] + 1
             if prev['unit_account'] > 0:
                 cur['unit_high'] = cur['high'] if cur['high'] > prev['unit_high'] else prev['unit_high']
             else:
                 cur['unit_high'] = cur['high']
         else:
             cur['unit_high'] = 0
+            cur['unit_day'] = 0
 
         if cur['unit_account'] > 0 and ( cur['action'] != "buy" or add ):
-            cur['stop_price'] = cur['unit_high'] - cur['ATR'] * stop_price_factor
+            stop_price_atr = cur['unit_high'] - cur['ATR'] * stop_price_factor
+            stop_p = stop_price_atr
+            if cur['unit_day'] > 10 and prev['close'] < prev['SMA17']:
+                stop_price_sma = cur['SMA17']
+                stop_p = max([stop_price_atr,stop_price_sma])
+            cur['stop_price'] = stop_p
 
         cur['account'] = prev['account'] - cur['unit'] * cur['unit_price']
         cur['unit_value'] = cur['unit_account'] * cur['close']
