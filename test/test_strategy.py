@@ -21,7 +21,8 @@ def simulate(symbol):
     stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
     df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount,
-                           max_add_count= max_add_cnt
+                           max_add_count= max_add_cnt,
+                           stop_price_factor=stop_price_factor
                            )
 
     rdf = None
@@ -58,11 +59,14 @@ if __name__ == '__main__':
     init_amount = 100000
     worker_cnt = 2
     max_add_cnt = 4
+    stop_price_factor = 4
     if len(sys.argv) >= 2:
         worker_cnt = int(sys.argv[1])
     if len(sys.argv) >=3:
         max_add_cnt = int(sys.argv[2])
-    print("worker count = %s, max add count %s" % (worker_cnt,max_add_cnt))
+    if len(sys.argv) >=4:
+        stop_price_factor = int(sys.argv[2])
+    print("worker count = %s, max add count %s, stop_price_factor %s" % (worker_cnt,max_add_cnt,stop_price_factor))
     df = get_blank_df()
     with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
         ft_map = {executor.submit(simulate, row['symbol']): row['symbol'] for i, row in stock.stock_df.iterrows()}

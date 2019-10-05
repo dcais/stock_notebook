@@ -69,7 +69,7 @@ class Chart:
                 datazoom_opts=[
                     opts.DataZoomOpts(
                         is_show=True,
-                        xaxis_index=[0, 1, 2],
+                        xaxis_index=[0, 1, 2,3],
                         type_="slider",
                         pos_top="90%",
                         range_start=90,
@@ -318,18 +318,18 @@ class Chart:
         grid_chart = Grid(
             init_opts=opts.InitOpts(
                 width="900px",
-                height="800px",
+                height="1000px",
             )
         )
         grid_chart.add(
             kline,
-            grid_opts=opts.GridOpts(pos_left="6%", pos_right="8%", height="55%"),
+            grid_opts=opts.GridOpts(pos_left="6%", pos_right="8%", height="45%"),
         )
 
         grid_chart.add(
             bar,
             grid_opts=opts.GridOpts(
-                pos_left="6%", pos_right="8%", pos_top="65%", height="10%"
+                pos_left="6%", pos_right="8%", pos_top="55%", height="10%"
             ),
         )
 
@@ -562,3 +562,50 @@ class Chart:
             )
         )
         return c
+
+    def get_turnover_chart(self,df):
+        xdatas = df.trade_date.to_numpy().tolist()
+        turnovers = df.turnover_rate.to_numpy().tolist()
+        volume_ratios = df.volume_ratio.to_numpy().tolist()
+        line = Line()
+        line.add_xaxis(xaxis_data=xdatas)
+        line.add_yaxis(
+            series_name='turnover_rate',
+            y_axis=turnovers,
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[0]),
+        )
+        line.add_yaxis(
+            series_name='volume_ratio',
+            y_axis=volume_ratios,
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[1]),
+        )
+        line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
+        return line
+
+    def get_adsoc_chart(self,df):
+        xdatas = df.trade_date.to_numpy().tolist()
+        adsocs = df.ADSOC.to_numpy().tolist()
+        line = Line()
+        line.add_xaxis(xaxis_data=xdatas)
+        line.add_yaxis(
+            series_name='ADSOC',
+            y_axis=adsocs,
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[0]),
+        )
+        line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
+        return line

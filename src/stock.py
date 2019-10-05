@@ -99,3 +99,40 @@ class Stock:
         df = df.sort_index()
         session.close()
         return df
+
+    def get_stock_basic(self,keyword,start_date,end_date):
+        session, schema = self.get_schema()
+        col = schema.get_collection('stock_x_daily_basic')
+        stock_info = self.get_stock_info(keyword)
+        query = "tsCode = :tscode"
+        params = {
+            "tscode": stock_info['code']
+        }
+        if start_date != '':
+            query += " and tradeDate >= :start_date"
+            params['start_date'] = pd.to_datetime(start_date).strftime("%Y-%m-%d")
+        if end_date != '':
+            query += ' and tradeDate <= :end_date'
+            params['end_date'] = pd.to_datetime(start_date).strftime("%Y-%m-%d")
+
+        docs = col.find(query) \
+            .bind(params) \
+            .execute()
+
+        dailyDatas = docs.fetch_all()
+
+        if len(dailyDatas) == 0:
+            return None
+
+        variables = dailyDatas[0].keys()
+        names = []
+        for v in variables:
+            names.append(convert_to_underline(v))
+        # print(names)
+        df = pd.DataFrame([[getattr(i, j) for j in variables] for i in dailyDatas], columns=names)
+        df = df[['trade_date', 'ts_code', 'low', 'vol', 'high', 'open', 'pre_close', 'close', 'amount', 'pct_chg']]
+        df['trade_date'] = df.trade_date.str[:10]
+        df.index = pd.to_datetime(df.trade_date)
+        df = df.sort_index()
+        session.close()
+        return df

@@ -20,6 +20,7 @@ class FirstStrategy:
         df['sar'] = talib.SAR(df.high, df.low, acceleration=0.1, maximum=2)
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
         df['macd_dif'], df['macd_dem'], df['macd_ocr'] = talib.MACD(df.close, 12, 26, 9)
+        df['ADSOC'] = talib.ADOSC(df.high, df.low, df.close, df.vol, fastperiod=3, slowperiod=10)
         for period in sma_periods:
             name = "SMA" + str(period)
             sma = talib.SMA(np.array(df.close), period)
@@ -59,6 +60,7 @@ class FirstStrategy:
         df.loc[:, 'add_price'] = np.array([float(0)] * len(df))
         df.loc[:, 'buy_count'] = np.array([float(0)] * len(df))
         df.loc[:, 'unit_day'] = np.array([float(0)] * len(df))
+        df.loc[:, 'ADSOC_trend'] = np.array([float(0)] * len(df))
 
         r_df = df.apply(self.run_strategy,axis=1,args =(start_date,end_date, init_amount, account_risk , stop_price_factor,  max_add_count))
         return r_df
@@ -71,7 +73,7 @@ class FirstStrategy:
         cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar'] and prev['sar'] > prev['close']
         # cond_macd = cur[''macd_ocr] > 0
 
-        if cond1 and cond2 and prev['unit_account'] == 0:
+        if cond1 and prev['unit_account'] == 0:
             signal = 'pre_buy'
         return signal;
 
@@ -121,6 +123,28 @@ class FirstStrategy:
             signal = 'pre_buy'
         return signal;
 
+    def stragyty_determine_buy_signal_5(self,prev, cur):
+        signal = ""
+        sma_g_f = 'SMA17'
+        sma_g_s = 'SMA25'
+        cond3 = cur[sma_g_f] > cur[sma_g_s] and cur[sma_g_f] > prev[sma_g_f] and cur[sma_g_s] > prev[sma_g_s]  # and cur[sma_f] > prev[sma_f] #and cur[sma_s] > prev[sma_s]
+        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar'] # and prev['sar'] > prev['close']
+        # cond_macd = cur[''macd_ocr] > 0
+
+        if cond1 and cond3 and prev['unit_account'] == 0:
+            signal = 'pre_buy'
+        return signal
+
+    def stragyty_determine_buy_signal_6(self,prev, cur):
+        signal = ""
+        cond_adsoc= cur['ADSOC'] > 0
+        cond1 = cur['unit_account'] == 0 and cur['close'] > cur['sar'] # and prev['sar'] > prev['close']
+        # cond_macd = cur[''macd_ocr] > 0
+
+        if cond1 and cond_adsoc and prev['unit_account'] == 0:
+            signal = 'pre_buy'
+        return signal
+
     def stragyty_calc_buy(self, prev, cur, init_account, account_risk, stop_atr_factor, max_add_count=0):
         signal = None
         action = ''
@@ -130,8 +154,7 @@ class FirstStrategy:
         add_price = 0
         add_cond1 = prev['unit_account'] > 0 and prev['add_price'] < cur['high'] and prev['add_price'] > 0
         # and_cond2 = prev['sar_stop_price'] < prev['close']
-
-        signal = self.stragyty_determine_buy_signal_1(prev, cur)
+        signal = self.stragyty_determine_buy_signal_6(prev, cur)
 
         if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
@@ -184,7 +207,7 @@ class FirstStrategy:
 
         return signal, action, unit, unit_price, unit_cost, stop_price, R, add_price, add
 
-    def stragyty_calc_sell(self,prev, cur):
+    def stragyty_calc_sell_1 (self,prev,cur):
         signal = None
         action = ''
         unit = unit_price = None
@@ -203,6 +226,33 @@ class FirstStrategy:
                 unit_price = stop_price
             #         elif cond2:
             #             signal = 'pre_sell'
+            elif prev['signal'] == 'pre_sell':
+                action = 'sell'
+                unit = 0 - prev['unit_account']
+                unit_price = cur['open']
+
+        return signal,action, unit, unit_price
+    def stragyty_calc_sell_2(self,prev, cur):
+        signal = None
+        action = ''
+        unit = unit_price = None
+        cond_adsoc =  prev['ADSOC_trend'] < 0  or prev['ADSOC'] < 0
+        sma_f = 'SMA17'
+        sma_s = 'SMA25'
+        # cond2 = cur[sma_f] < cur[sma_s] and cur[sma_f] < prev[sma_f] and cur[sma_s] < prev[sma_s]
+        if prev['unit_account'] > 0:
+            #         stop_price = prev['stop_price'] if prev['stop_price'] > prev['sar_stop_price'] else prev['sar_stop_price']
+            #         if stop_price > prev['close']:
+            stop_price = prev['stop_price']
+            # 铁定要卖出
+            if cur['low'] < stop_price and cond_adsoc:
+                action = 'sell'
+                unit = 0 - prev['unit_account']
+
+                unit_price = stop_price
+            #         elif cond2:
+            #             signal = 'pre_sell'
+
             elif prev['signal'] == 'pre_sell':
                 action = 'sell'
                 unit = 0 - prev['unit_account']
@@ -246,6 +296,8 @@ class FirstStrategy:
             self.prev = cur.copy()
             return cur
 
+        cur['ADSOC_trend'] = cur['ADSOC'] - prev['ADSOC']
+
         signal,action, unit, unit_price,\
         unit_cost, stop_price, R,\
         add_price, add = self.stragyty_calc_buy(prev, cur, init_amount,account_risk,stop_price_factor, max_add_count)
@@ -262,7 +314,7 @@ class FirstStrategy:
             cur['R'] = R
             self.last_buy_price = unit_price
 
-        signal, action, unit, unit_price = self.stragyty_calc_sell(prev, cur)
+        signal, action, unit, unit_price = self.stragyty_calc_sell_2(prev, cur)
 
         if signal is not None:
             cur['signal'] = signal

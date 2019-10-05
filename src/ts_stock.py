@@ -54,8 +54,16 @@ class TsStock:
         df = None
         if (stockInfo['is_index']):
             df = self.pro.index_daily(ts_code=stockInfo['code'], start_date=start_date, end_date=end_date)
+            df.index = pd.to_datetime(df.trade_date)
+            df = df.sort_index()
         else:
             df = ts.pro_bar(ts_code=stockInfo['code'], adj='qfq', start_date=start_date, end_date=end_date)
-        df.index = pd.to_datetime(df.trade_date)
-        df = df.sort_index()
+            df_basic = self.pro.daily_basic(ts_code=stockInfo['code'], start_date=start_date, end_date=end_date)
+            df.index = pd.to_datetime(df.trade_date)
+            df = df.sort_index()
+            df_basic.index = pd.to_datetime(df_basic.trade_date)
+            df_basic = df_basic.sort_index()
+            df['turnover_rate'] = df_basic['turnover_rate']
+            df['volume_ratio'] = df_basic['volume_ratio']
+
         return df
