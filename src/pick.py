@@ -72,4 +72,18 @@ if __name__ == '__main__':
             else:
                 pass
 
+    df.index = df['ts_code']
+
+    df_hs300 = stock.get_hs_300()
+    df['hs300'] = ''
+    df.loc[df_hs300['con_code'], 'hs300'] = 'Y'
+
+    df_zz500 = stock.get_zz_500()
+    df['zz500'] = ''
+    df.loc[df_zz500['con_code'], 'zz500'] = 'Y'
+
+    df_sz50 = stock.get_sz_50()
+    df['sz50'] = ''
+    df.loc[df_sz50['con_code'], 'sz50'] = 'Y'
+
     df.to_excel("pick.xlsx")

@@ -4,6 +4,8 @@ import re
 import mysqlx
 import json
 from os.path import abspath, join, dirname
+import datetime
+from datetime import date
 
 connection_string = {
 }
@@ -15,9 +17,11 @@ client_options = {
     }
 }
 
+
 def convert_to_underline(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
 
 class Stock:
     token = '36d50a0386e9066b5c79c2de58ea2d3a9b980020041adc910f76bfc7'
@@ -40,7 +44,7 @@ class Stock:
     def get_schema(self):
         session = self.x_client.get_session()
         schema = session.get_schema('stock')
-        return (session,schema)
+        return (session, schema)
 
     def get_stock_info(self, keyword):
         code = ''
@@ -62,13 +66,13 @@ class Stock:
             "name": name,
         }
 
-    def get_daily_data(self, keyword, start_date = '' , end_date = '' ):
-        session,schema = self.get_schema();
+    def get_daily_data(self, keyword, start_date='', end_date=''):
+        session, schema = self.get_schema();
         stock_info = self.get_stock_info(keyword)
         col = schema.get_collection('stock_x_split_adjusted_daily')
         query = "tsCode = :tscode"
         params = {
-            "tscode" : stock_info['code']
+            "tscode": stock_info['code']
         }
         if start_date != '':
             query += " and tradeDate >= :start_date"
@@ -77,8 +81,8 @@ class Stock:
             query += ' and tradeDate <= :end_date'
             params['end_date'] = pd.to_datetime(start_date).strftime("%Y-%m-%d")
 
-        docs = col.find(query)\
-            .bind(params)\
+        docs = col.find(query) \
+            .bind(params) \
             .execute()
 
         dailyDatas = docs.fetch_all()
@@ -92,7 +96,7 @@ class Stock:
             names.append(convert_to_underline(v))
         # print(names)
         df = pd.DataFrame([[getattr(i, j) for j in variables] for i in dailyDatas], columns=names)
-        df = df[['trade_date','ts_code','low','vol','high','open','pre_close','close','amount','pct_chg']]
+        df = df[['trade_date', 'ts_code', 'low', 'vol', 'high', 'open', 'pre_close', 'close', 'amount', 'pct_chg']]
         df['trade_date'] = df.trade_date.str[:10]
 
         df.index = pd.to_datetime(df.trade_date)
@@ -100,7 +104,7 @@ class Stock:
         session.close()
         return df
 
-    def get_stock_basic(self,keyword,start_date,end_date):
+    def get_stock_basic(self, keyword, start_date, end_date):
         session, schema = self.get_schema()
         col = schema.get_collection('stock_x_daily_basic')
         stock_info = self.get_stock_info(keyword)
@@ -136,3 +140,27 @@ class Stock:
         df = df.sort_index()
         session.close()
         return df
+
+    def index_weight(self, index_code):
+        today = date.today()
+
+        begin = today.replace(day=1)
+        df = self.pro.index_weight(index_code=index_code, start_date=begin.strftime('%Y%m%d'))
+
+        if len(df) == 0:
+           end = today.replace(day=1) - datetime.timedelta(1)
+           begin = end.replace(day=1)
+           df = self.pro.index_weight(index_code=index_code, start_date=begin.strftime('%Y%m%d'), end_date=end.strftime('%Y%m%d'))
+
+        df = df.drop_duplicates(["con_code"], keep="last")
+        df.index = df["con_code"]
+        return df
+
+    def get_hs_300(self):
+        return self.index_weight('399300.SZ')
+
+    def get_zz_500(self):
+        return self.index_weight('000905.SH')
+
+    def get_sz_50(self):
+        return self.index_weight("000016.SH")
