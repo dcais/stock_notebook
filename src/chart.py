@@ -97,7 +97,7 @@ class Chart:
                 visualmap_opts=opts.VisualMapOpts(
                     is_show=True,
                     dimension=2,
-                    series_index=[5, 6, 7, 8, 9, 10,11,12],
+                    series_index=[5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20],
                     is_piecewise=True,
                     pieces=[
                         {"value": 1, "color": "#ff7f74"},
@@ -185,7 +185,7 @@ class Chart:
                 .add_yaxis(
                 series_name="Volume",
                 yaxis_data=[
-                    [i, vols[i], 1 if kdatas[i][0] > kdatas[i][1] else -1]
+                    [i, vols[i], 1 if kdatas[i][0] < kdatas[i][1] else -1]
                     for i in range(len(kdatas))
                 ],
                 #         yaxis_data = vols,
@@ -592,14 +592,14 @@ class Chart:
         line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
         return line
 
-    def get_adsoc_chart(self,df):
+    def get_adosc_chart(self,df):
         xdatas = df.trade_date.to_numpy().tolist()
-        adsocs = df.ADSOC.to_numpy().tolist()
+        adoscs = df.ADOSC.to_numpy().tolist()
         line = Line()
         line.add_xaxis(xaxis_data=xdatas)
         line.add_yaxis(
-            series_name='ADSOC',
-            y_axis=adsocs,
+            series_name='ADOSC',
+            y_axis=adoscs,
             symbol="none",
             is_smooth=True,
             is_hover_animation=False,
