@@ -145,6 +145,16 @@ class FirstStrategy:
             signal = 'pre_buy'
         return signal
 
+    def stragyty_determine_buy_signal_7(self,prev, cur):
+        signal = ""
+        cond_adosc= cur['ADOSC'] > 0 and cur['ADOSC_trend'] > 0
+        cond1 = cur['close'] > cur['sar'] # and prev['sar'] > prev['close']
+        # cond_macd = cur[''macd_ocr] > 0
+
+        if cond1 and cond_adosc:
+            signal = 'pre_buy'
+        return signal
+
     def stragyty_calc_buy(self, prev, cur, init_account, account_risk, stop_atr_factor, max_add_count=0):
         signal = None
         action = ''
@@ -154,7 +164,7 @@ class FirstStrategy:
         add_price = 0
         add_cond1 = prev['unit_account'] > 0 and prev['add_price'] < cur['high'] and prev['add_price'] > 0
         # and_cond2 = prev['sar_stop_price'] < prev['close']
-        signal = self.stragyty_determine_buy_signal_6(prev, cur)
+        signal = self.stragyty_determine_buy_signal_7(prev, cur)
 
         if prev['signal'] == 'pre_buy' and prev['unit_account'] == 0:
             action = 'buy'
