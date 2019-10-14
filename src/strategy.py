@@ -18,6 +18,7 @@ class FirstStrategy:
         if df is None:
             return
         df['sar'] = talib.SAR(df.high, df.low, acceleration=0.1, maximum=2)
+        df['sar_stop'] = talib.SAR(df.high, df.low, acceleration=0.02, maximum=0.2)
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
         df['macd_dif'], df['macd_dem'], df['macd_ocr'] = talib.MACD(df.close, 12, 26, 9)
         df['ADOSC'] = talib.ADOSC(df.high, df.low, df.close, df.vol, fastperiod=3, slowperiod=10)
@@ -61,6 +62,7 @@ class FirstStrategy:
         df.loc[:, 'buy_count'] = np.array([float(0)] * len(df))
         df.loc[:, 'unit_day'] = np.array([float(0)] * len(df))
         df.loc[:, 'ADOSC_trend'] = np.array([float(0)] * len(df))
+        df.loc[:, 'pre_buy_count'] = np.array([float(0)] * len(df))
 
         r_df = df.apply(self.run_strategy,axis=1,args =(start_date,end_date, init_amount, account_risk , stop_price_factor,  max_add_count))
         return r_df
@@ -147,7 +149,7 @@ class FirstStrategy:
 
     def stragyty_determine_buy_signal_7(self,prev, cur):
         signal = ""
-        cond_adosc= cur['ADOSC'] > 0 and cur['ADOSC_trend'] > 0
+        cond_adosc= cur['ADOSC'] > 0 # and cur['ADOSC_trend'] > 0 and prev['ADOSC'] < 0
         cond1 = cur['close'] > cur['sar'] and cur['close'] > cur['SMA8']
         # cond_macd = cur[''macd_ocr] > 0
 
@@ -329,6 +331,10 @@ class FirstStrategy:
             cur['stop_price'] = stop_price
             cur['R'] = R
             self.last_buy_price = unit_price
+        if signal == 'pre_buy':
+            cur['pre_buy_count'] = prev['pre_buy_count'] + 1
+        else:
+            cur['pre_buy_count'] = 0
 
         signal, action, unit, unit_price = self.stragyty_calc_sell_2(prev, cur)
 
@@ -368,10 +374,16 @@ class FirstStrategy:
             stop_price_atr = cur['unit_high'] - cur['ATR'] * stop_price_factor
             stop_p = stop_price_atr
 
-            # stop_p = stop_p + ( cur['unit_day'] * 0.002 * cur['ATR'])
-            # if cur['unit_day'] > 20 and prev['close'] < prev['SMA17']:
-            #     stop_price_sma = cur['SMA17']
-            #     stop_p = max([stop_price_atr,stop_price_sma])
+            # stop_price_sar = 0
+            # if cur['close'] > cur['sar_stop']:
+            #     stop_price_sar = cur['sar_stop']
+
+            # stop_p = max([stop_price_atr,stop_price_sar])
+
+            if cur['unit_day'] > 20 and prev['close'] < prev['SMA17']:
+                stop_price_sma = cur['SMA17']
+                stop_p = max([stop_price_atr,stop_price_sma])
+                # stop_p = stop_p + ( cur['unit_day'] * 0.05 * cur['ATR'])
             cur['stop_price'] = stop_p
 
         cur['account'] = prev['account'] - cur['unit'] * cur['unit_price']
