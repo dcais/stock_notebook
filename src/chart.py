@@ -71,7 +71,7 @@ class Chart:
                         is_show=True,
                         xaxis_index=[0, 1, 2,3],
                         type_="slider",
-                        pos_top="90%",
+                        pos_top="86%",
                         range_start=90,
                         range_end=100,
                     ),
@@ -318,18 +318,18 @@ class Chart:
         grid_chart = Grid(
             init_opts=opts.InitOpts(
                 width="900px",
-                height="1000px",
+                height="800px",
             )
         )
         grid_chart.add(
             kline,
-            grid_opts=opts.GridOpts(pos_left="6%", pos_right="8%", height="45%"),
+            grid_opts=opts.GridOpts(pos_left="6%", pos_right="8%", height="54%"),
         )
 
         grid_chart.add(
             bar,
             grid_opts=opts.GridOpts(
-                pos_left="6%", pos_right="8%", pos_top="55%", height="10%"
+                pos_left="6%", pos_right="8%", pos_top="61%", height="7%"
             ),
         )
 
@@ -601,7 +601,7 @@ class Chart:
             series_name='ADOSC',
             y_axis=adoscs,
             symbol="none",
-            is_smooth=True,
+            is_smooth=False,
             is_hover_animation=False,
             linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
             label_opts=opts.LabelOpts(is_show=False),

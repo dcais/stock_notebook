@@ -148,7 +148,7 @@ class FirstStrategy:
     def stragyty_determine_buy_signal_7(self,prev, cur):
         signal = ""
         cond_adosc= cur['ADOSC'] > 0 and cur['ADOSC_trend'] > 0
-        cond1 = cur['close'] > cur['sar'] # and prev['sar'] > prev['close']
+        cond1 = cur['close'] > cur['sar'] and cur['close'] > cur['SMA8']
         # cond_macd = cur[''macd_ocr] > 0
 
         if cond1 and cond_adosc:
@@ -250,9 +250,15 @@ class FirstStrategy:
         sma_f = 'SMA17'
         sma_s = 'SMA25'
         # cond2 = cur[sma_f] < cur[sma_s] and cur[sma_f] < prev[sma_f] and cur[sma_s] < prev[sma_s]
+
         if prev['unit_account'] > 0:
+            if prev[sma_f] > prev[sma_s] and cur[sma_f] < cur[sma_s] and cur[sma_f] < prev[sma_s] and cur[sma_s] < prev[sma_s]:
+                cur['signal'] = 'pre_sell'
             #         stop_price = prev['stop_price'] if prev['stop_price'] > prev['sar_stop_price'] else prev['sar_stop_price']
             #         if stop_price > prev['close']:
+            # if cur['ADOSC_trend'] < 0 and cur['ADOSC'] < 0 and prev['ADOSC'] > 0:
+            #     cur['signal'] = 'pre_sell'
+
             stop_price = prev['stop_price']
             # 铁定要卖出
             if cur['low'] < stop_price and cond_adosc:
@@ -361,9 +367,11 @@ class FirstStrategy:
         if cur['unit_account'] > 0 and ( cur['action'] != "buy" or add ):
             stop_price_atr = cur['unit_high'] - cur['ATR'] * stop_price_factor
             stop_p = stop_price_atr
-            if cur['unit_day'] > 10 and prev['close'] < prev['SMA17']:
-                stop_price_sma = cur['SMA17']
-                stop_p = max([stop_price_atr,stop_price_sma])
+
+            # stop_p = stop_p + ( cur['unit_day'] * 0.002 * cur['ATR'])
+            # if cur['unit_day'] > 20 and prev['close'] < prev['SMA17']:
+            #     stop_price_sma = cur['SMA17']
+            #     stop_p = max([stop_price_atr,stop_price_sma])
             cur['stop_price'] = stop_p
 
         cur['account'] = prev['account'] - cur['unit'] * cur['unit_price']
