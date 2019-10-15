@@ -61,8 +61,13 @@ if __name__ == '__main__':
                 df_i = future.result()
                 if df_i is not None:
                     ts_code = df_i['ts_code']
-                    concept_details = df_concept_detail.loc[ts_code]
-                    df_i['concepts'] = ",".join(concept_details['concept_name'].to_numpy().tolist())
+
+                    if ts_code in df_concept_detail.index:
+                        concept_details = df_concept_detail.loc[ts_code]
+                        df_i['concepts'] = ",".join(concept_details['concept_name'].to_numpy().tolist())
+                    else:
+                        df_i['concepts'] = ''
+
                     logging.info("simulate %s finished " % symbol)
                     if df is None:
                         df = df_i
