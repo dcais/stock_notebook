@@ -164,3 +164,29 @@ class Stock:
 
     def get_sz_50(self):
         return self.index_weight("000016.SH")
+
+    def get_concept_detail(self):
+        session, schema = self.get_schema();
+        col = schema.get_collection('stock_x_concept_detail')
+        query = "true"
+        docs = col.find(query) \
+            .execute()
+
+        concept_details = docs.fetch_all()
+
+        if len(concept_details) == 0:
+            return None
+
+        variables = ['code', 'name', 'tsCode', 'conceptName']
+        print(variables)
+        names = []
+        for v in variables:
+            names.append(convert_to_underline(v))
+        # print(names)
+        df = pd.DataFrame([[getattr(i, j) for j in variables] for i in concept_details], columns=names)
+
+        df.index = df.ts_code
+        df = df.sort_index()
+        session.close()
+        return df
+

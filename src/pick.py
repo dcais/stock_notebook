@@ -51,6 +51,7 @@ if __name__ == '__main__':
     if len(sys.argv) >=4:
         stop_price_factor = int(sys.argv[2])
     print("worker count = %s, max add count %s, stop_price_factor %s" % (worker_cnt,max_add_cnt,stop_price_factor))
+    df_concept_detail = stock.get_concept_detail()
     df = None
     with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
         ft_map = {executor.submit(simulate, row['symbol']): row['symbol'] for i, row in stock.stock_df.iterrows()}
@@ -59,6 +60,9 @@ if __name__ == '__main__':
             try:
                 df_i = future.result()
                 if df_i is not None:
+                    ts_code = df_i['ts_code']
+                    concept_details = df_concept_detail.loc[ts_code]
+                    df_i['concepts'] = ",".join(concept_details['concept_name'].to_numpy().tolist())
                     logging.info("simulate %s finished " % symbol)
                     if df is None:
                         df = df_i
@@ -85,5 +89,6 @@ if __name__ == '__main__':
     df_sz50 = stock.get_sz_50()
     df['sz50'] = ''
     df.loc[df_sz50['con_code'], 'sz50'] = 'Y'
+
 
     df.to_excel("pick.xlsx")
