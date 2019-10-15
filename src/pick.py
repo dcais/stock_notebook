@@ -86,16 +86,16 @@ if __name__ == '__main__':
     df_hs300 = stock.get_hs_300()
     df_hs300['hs300'] = 'Y'
     df_hs300 = df_hs300[['hs300']]
-    pd = pd.merge(df, df_hs300, left_index=True, right_index=True, how='left')
+    df = pd.merge(df, df_hs300, left_index=True, right_index=True, how='left')
 
     df_zz500 = stock.get_zz_500()
     df_zz500['zz500'] = 'Y'
     df_zz500 = df_zz500[['zz500']]
-    pd = pd.merge(df, df_zz500, left_index=True, right_index=True, how='left')
+    df = pd.merge(df, df_zz500, left_index=True, right_index=True, how='left')
 
     df_sz50 = stock.get_sz_50()
     df_sz50['sz50'] = 'Y'
     df_sz50 = df_sz50[['sz50']]
-    pd = pd.merge(df, df_sz50, left_index=True, right_index=True, how='left')
+    df = pd.merge(df, df_sz50, left_index=True, right_index=True, how='left')
 
     df.to_excel("pick.xlsx")
