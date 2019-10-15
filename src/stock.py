@@ -153,7 +153,8 @@ class Stock:
            df = self.pro.index_weight(index_code=index_code, start_date=begin.strftime('%Y%m%d'), end_date=end.strftime('%Y%m%d'))
 
         df = df.drop_duplicates(["con_code"], keep="last")
-        df.index = df["con_code"]
+        df['ts_code'] = df['con_code']
+        df.index = df["ts_code"]
         return df
 
     def get_hs_300(self):

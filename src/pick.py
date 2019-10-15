@@ -21,7 +21,7 @@ def simulate(symbol):
     stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
     df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount,
-                           max_add_count= max_add_cnt,
+                           max_add_count=max_add_cnt,
                            stop_price_factor=stop_price_factor
                            )
 
@@ -46,11 +46,11 @@ if __name__ == '__main__':
     stop_price_factor = 4
     if len(sys.argv) >= 2:
         worker_cnt = int(sys.argv[1])
-    if len(sys.argv) >=3:
+    if len(sys.argv) >= 3:
         max_add_cnt = int(sys.argv[2])
-    if len(sys.argv) >=4:
+    if len(sys.argv) >= 4:
         stop_price_factor = int(sys.argv[2])
-    print("worker count = %s, max add count %s, stop_price_factor %s" % (worker_cnt,max_add_cnt,stop_price_factor))
+    print("worker count = %s, max add count %s, stop_price_factor %s" % (worker_cnt, max_add_cnt, stop_price_factor))
     df_concept_detail = stock.get_concept_detail()
     df = None
     with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
@@ -84,16 +84,18 @@ if __name__ == '__main__':
     df.index = df['ts_code']
 
     df_hs300 = stock.get_hs_300()
-    df['hs300'] = ''
-    df.loc[df_hs300['con_code'], 'hs300'] = 'Y'
+    df_hs300['hs300'] = 'Y'
+    df_hs300 = df_hs300[['hs300']]
+    pd = pd.merge(df, df_hs300, left_index=True, right_index=True, how='left')
 
     df_zz500 = stock.get_zz_500()
-    df['zz500'] = ''
-    df.loc[df_zz500['con_code'], 'zz500'] = 'Y'
+    df_zz500['zz500'] = 'Y'
+    df_zz500 = df_zz500[['zz500']]
+    pd = pd.merge(df, df_zz500, left_index=True, right_index=True, how='left')
 
     df_sz50 = stock.get_sz_50()
-    df['sz50'] = ''
-    df.loc[df_sz50['con_code'], 'sz50'] = 'Y'
-
+    df_sz50['sz50'] = 'Y'
+    df_sz50 = df_sz50[['sz50']]
+    pd = pd.merge(df, df_sz50, left_index=True, right_index=True, how='left')
 
     df.to_excel("pick.xlsx")
