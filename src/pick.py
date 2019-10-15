@@ -60,7 +60,7 @@ if __name__ == '__main__':
             try:
                 df_i = future.result()
                 if df_i is not None:
-                    ts_code = df_i['ts_code']
+                    ts_code = df_i['ts_code'][0]
 
                     if ts_code in df_concept_detail.index:
                         concept_details = df_concept_detail.loc[ts_code]
