@@ -63,7 +63,7 @@ if __name__ == '__main__':
                     ts_code = df_i['ts_code'][0]
 
                     if ts_code in df_concept_detail.index:
-                        concept_details = df_concept_detail.loc[ts_code]
+                        concept_details = df_concept_detail.loc[ts_code:ts_code]
                         df_i['concepts'] = ",".join(concept_details['concept_name'].to_numpy().tolist())
                     else:
                         df_i['concepts'] = ''
