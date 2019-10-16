@@ -29,17 +29,18 @@ class Stock:
     stock_df = None
 
     def __init__(self):
-        ts.set_token(Stock.token)
+        config_path = join(abspath(dirname(__file__)), '../config.json')
+        with open(config_path) as json_file:
+            conf_dict = json.load(json_file)
+            conf_mysql = conf_dict['mysql']
+            conf_tushare_token = conf_dict['tushareToken']
+
+        ts.set_token(conf_tushare_token)
         self.pro = ts.pro_api()
         df = self.pro.stock_basic(exchange='', list_status='L')
         self.stock_df = df
 
-        config_path = join(abspath(dirname(__file__)), '../config.json')
-
-        with open(config_path) as json_file:
-            connection_string = json.load(json_file)
-            # print(connection_string)
-        self.x_client = mysqlx.get_client(connection_string, client_options)
+        self.x_client = mysqlx.get_client(conf_mysql, client_options)
 
     def get_schema(self):
         session = self.x_client.get_session()

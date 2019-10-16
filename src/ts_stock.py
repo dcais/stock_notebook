@@ -1,10 +1,11 @@
 import tushare as ts
 import pandas as pd
+import json
 import re
+from os.path import abspath, join, dirname
 
 
 class TsStock:
-    token = '36d50a0386e9066b5c79c2de58ea2d3a9b980020041adc910f76bfc7'
     index = {'上证综指': '000001.SH',
              '深证成指': '399001.SZ',
              '沪深300': '000300.SH',
@@ -15,7 +16,11 @@ class TsStock:
              '上证180': '000010.SH'}
 
     def __init__(self):
-        ts.set_token(TsStock.token)
+        config_path = join(abspath(dirname(__file__)), '../config.json')
+        with open(config_path) as json_file:
+            conf_dict = json.load(json_file)
+            conf_tushare_token = conf_dict['tushareToken']
+        ts.set_token(conf_tushare_token)
         self.pro = ts.pro_api()
         df = self.pro.stock_basic(exchange='', list_status='L')
         self.stock_df = df

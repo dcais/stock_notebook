@@ -380,7 +380,10 @@ class FirstStrategy:
 
             # stop_p = max([stop_price_atr,stop_price_sar])
 
-            if cur['unit_day'] > 20 and prev['close'] < prev['SMA17']:
+            if cur['unit_day'] > 20 and cur['close'] < cur['SMA17']\
+                    and cur['SMA17'] < cur['SMA25']\
+                    and cur['SMA17'] < prev['SMA17']\
+                    and cur['SMA25'] < prev['SMA25']:
                 stop_price_sma = cur['SMA17']
                 stop_p = max([stop_price_atr,stop_price_sma])
                 # stop_p = stop_p + ( cur['unit_day'] * 0.05 * cur['ATR'])
