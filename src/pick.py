@@ -17,7 +17,7 @@ def get_blank_df():
 
 
 def simulate(symbol):
-    logging.info("start simulate " + symbol)
+    logging.info("start pick " + symbol)
     stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
     df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount,
@@ -68,13 +68,13 @@ if __name__ == '__main__':
                     else:
                         df_i['concepts'] = ''
 
-                    logging.info("simulate %s finished " % symbol)
+                    logging.info("pick %s finished " % symbol)
                     if df is None:
                         df = df_i
                     else:
                         df = df.append(df_i)
                 else:
-                    logging.info("simulate %s finished, the result is None", symbol)
+                    logging.info("pick %s finished, the result is None", symbol)
 
             except Exception as exc:
                 logging.error('%s generated an exception: %s' % (symbol, exc))
