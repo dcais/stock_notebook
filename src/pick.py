@@ -98,4 +98,5 @@ if __name__ == '__main__':
     df_sz50 = df_sz50[['sz50']]
     df = pd.merge(df, df_sz50, left_index=True, right_index=True, how='left')
 
+    df['RPS'] = df.per_50.rank(ascending=0, method='min') / len(df) * 100
     df.to_excel("pick.xlsx")

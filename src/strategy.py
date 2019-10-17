@@ -28,6 +28,10 @@ class FirstStrategy:
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
         df['macd_dif'], df['macd_dem'], df['macd_ocr'] = talib.MACD(df.close, 12, 26, 9)
         df['ADOSC'] = talib.ADOSC(df.high, df.low, df.close, df.vol, fastperiod=3, slowperiod=10)
+
+        close50 = df.close.shift(50)
+        df['per_50'] = (df.close - close50) / close50
+
         for period in sma_periods:
             name = "SMA" + str(period)
             sma = talib.SMA(np.array(df.close), period)

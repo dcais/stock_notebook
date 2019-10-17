@@ -6,6 +6,7 @@ from os.path import abspath, join, dirname
 
 
 class TsStock:
+    token = ''
     index = {'上证综指': '000001.SH',
              '深证成指': '399001.SZ',
              '沪深300': '000300.SH',
@@ -20,6 +21,7 @@ class TsStock:
         with open(config_path) as json_file:
             conf_dict = json.load(json_file)
             conf_tushare_token = conf_dict['tushareToken']
+            self.token = conf_tushare_token
         ts.set_token(conf_tushare_token)
         self.pro = ts.pro_api()
         df = self.pro.stock_basic(exchange='', list_status='L')
