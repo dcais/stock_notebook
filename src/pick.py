@@ -18,7 +18,7 @@ def get_blank_df():
 
 def simulate(symbol):
     logging.info("start pick " + symbol)
-    stragety = FirstStrategy(stock, symbol, start_date="2012-01-01")
+    stragety = FirstStrategy(stock, symbol, start_date="2016-01-01")
     df = stragety.simulate(start_date="20180101",
                            init_amount=init_amount,
                            max_add_count=max_add_cnt,
