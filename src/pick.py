@@ -4,7 +4,7 @@ from os.path import abspath, join, dirname
 import pandas as pd
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO,datefmt='%Y-%m-%d %H:%M:%S %p')
 sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 
 from src.stock import Stock
