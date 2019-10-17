@@ -6,3 +6,4 @@ config.json
 *.xlsx
 *.html
 *.out
+/bin/switch_conda_env.sh
