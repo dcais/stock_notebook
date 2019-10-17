@@ -24,7 +24,6 @@ def convert_to_underline(name):
 
 
 class Stock:
-    token = '36d50a0386e9066b5c79c2de58ea2d3a9b980020041adc910f76bfc7'
     x_client = None
     stock_df = None
 
