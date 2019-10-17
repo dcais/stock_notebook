@@ -12,11 +12,17 @@ class FirstStrategy:
     prev = None
     last_buy_price = 0
 
-    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 43, 99, 145,318,453]):
+    def __init__(self, stock, stock_keyword, start_date='', end_date='', sma_periods=[8 ,17, 25, 43, 99, 145,318,453], sina_realtime=None):
+
         self.stock_info = stock.get_stock_info(stock_keyword)
         df = stock.get_daily_data(stock_keyword, start_date, end_date)
         if df is None:
             return
+        if sina_realtime is not None:
+            df_rt = sina_realtime.get_realtime(self.stock_info['code'])
+            if df_rt.index[0] not in df.index:
+                df = df.append(df_rt,sort=False)
+
         df['sar'] = talib.SAR(df.high, df.low, acceleration=0.1, maximum=2)
         df['sar_stop'] = talib.SAR(df.high, df.low, acceleration=0.02, maximum=0.2)
         df['ATR'] = talib.ATR(df.high, df.low, df.close, timeperiod=25)
