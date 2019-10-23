@@ -27,7 +27,7 @@ class TradeDetail:
         self.df = self.df.append(
             {
                 'trade_date': trade_date,
-                'position_key': unit_price,
+                'position_key': position_key,
                 'trade_unit': - trade_unit,
                 'unit_price': unit_price,
                 'trade_type': 'sell'
@@ -49,10 +49,10 @@ class TradeDetail:
         self.df.to_excel(writer, sheet_name='trade_detail', index=False)
 
 
-class PositionMngr:
+class PositionMgr:
     df = None
     stop_atr_factor = 2
-    df_i = None
+    # df_i = None
     df_pos_record = None
     trade_detail = TradeDetail()
 
@@ -88,6 +88,7 @@ class PositionMngr:
                 'position_key',
                 'unit_account',
                 'close_price',
+                'unit_cost',
                 'R',
                 'P/R',
                 'stop_price',
@@ -128,7 +129,7 @@ class PositionMngr:
         self.add_prices = []
         self.stop_price = 0
         self.close_price = 0
-        self.df_i = self.gen_new_df()
+        # self.df_i = self.gen_new_df()
 
     def buy(self, trade_date: str, unit_price: float, atr: float, account):
         trade_amount = self.buy_mng(trade_date=trade_date, unit_price=unit_price, atr=atr, account=account)
@@ -149,7 +150,7 @@ class PositionMngr:
         # 每股风险
         R = atr * self.stop_atr_factor
 
-        unit = np.floor(account.get_account_amount() * self.account_risk / R / 100) * 100
+        unit = np.floor(account.get_account_scale() * self.account_risk / R / 100) * 100
 
         if unit == 0:
             return 0
@@ -166,6 +167,7 @@ class PositionMngr:
                                     unit_price=unit_price)
 
         unit_cost = self.trade_detail.unit_cost(position_key=self.position_key)
+        self.unit_high_price = max(unit_price, self.unit_high_price)
         stop_price = self.unit_high_price - self.stop_atr_factor * atr
 
         R = max(R, unit_cost - stop_price)
@@ -195,7 +197,7 @@ class PositionMngr:
 
         profit = series_today.close - self.unit_cost
         self.unit_high_price = max(self.unit_high_price, series_today.high)
-        self.P_R = profit / self.unit_cost
+        self.P_R = profit / self.R
         self.stop_price = self.unit_high_price - self.stop_atr_factor * series_today.ATR
         self.close_price = series_today.close
 
@@ -212,15 +214,16 @@ class PositionMngr:
     def day_end(self, trade_date: str):
         if self.unit_account == 0:
             return
-        if self.df_i is None:
-            return
+        # # if self.df_i is None:
+        #     return
 
-        self.df_i = self.df_i.append(
+        self.df = self.df.append(
             {
                 'trade_date': self.trade_date,
                 'position_key': self.position_key,
                 'unit_account': self.unit_account,
                 'close_price': self.close_price,
+                'unit_cost': self.unit_cost,
                 'R': self.R,
                 'P/R': self.P_R,
                 'stop_price': self.stop_price,
@@ -247,7 +250,9 @@ class PositionMngr:
         self.trade_detail.trade_sell(trade_date, self.position_key, self.unit_account, unit_price)
 
         self.unit_account = 0
-        self.df_i = self.df_i.append(
+        self.buy_cnt = 0
+
+        self.df = self.df.append(
             {
                 'trade_date': trade_date,
                 'position_key': self.position_key,
@@ -256,8 +261,8 @@ class PositionMngr:
             ignore_index=True,
         )
 
-        self.df = self.df.append(self.df_i, ignore_index=True)
-        self.df_i = None
+        # self.df = self.df.append(self.df_i, ignore_index=True)
+        # self.df_i = None
 
         return trade_amount
 
@@ -275,14 +280,15 @@ class PositionMngr:
             'W/L': W_L,
             'unit_cost': unit_cost,
             'close_price': close_price,
+            'profit': close_price - unit_cost,
             'unit': unit
         }, ignore_index=True)
 
-    def get_current_risk(self):
-        if len(self.df_i) > 0:
-            return self.df_i.tail(1)[0]
-        else:
-            return None
+    # def get_current_risk(self):
+    # if len(self.df_i) > 0:
+    # return self.df.tail(1)[0]
+    # else:
+    #     return None
 
     def get_summary(self):
         return self.df
@@ -293,6 +299,26 @@ class PositionMngr:
     def position_value(self):
         return self.unit_account * self.close_price
 
-    def to_excel(self, wirter):
-        self.df.to_excel(wirter, sheet_name='position', index=False)
-        self.trade_detail.to_excel(wirter)
+    def to_excel(self, writer):
+        self.df.to_excel(writer, sheet_name='position', index=False)
+        self.df_pos_record.to_excel(writer, sheet_name='position_record', index=False)
+        self.gen_position_report().to_excel(writer, sheet_name='position_report', index=False)
+        self.trade_detail.to_excel(writer)
+
+    def gen_position_report(self):
+        # 交易次数
+        trade_cnt = len(self.df_pos_record)
+        # 胜率
+        win_rate = len(self.df_pos_record.loc[self.df_pos_record['W/L'] == 'L']) / trade_cnt
+
+        df_i = pd.DataFrame([
+            (
+                trade_cnt,
+                win_rate
+            )
+        ],
+            columns=[
+                'trade_cnt',
+                'win_rate',
+            ])
+        return df_i

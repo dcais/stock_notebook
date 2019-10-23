@@ -94,16 +94,16 @@ class Chart:
                     border_color="#ccc",
                     textstyle_opts=opts.TextStyleOpts(color="#000"),
                 ),
-                visualmap_opts=opts.VisualMapOpts(
-                    is_show=True,
-                    dimension=2,
-                    series_index=[5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20],
-                    is_piecewise=True,
-                    pieces=[
-                        {"value": 1, "color": "#ff7f74"},
-                        {"value": -1, "color": "#67e384"},
-                    ],
-                ),
+                # visualmap_opts=opts.VisualMapOpts(
+                #     is_show=True,
+                #     dimension=2,
+                #     series_index=[5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20],
+                #     is_piecewise=True,
+                #     pieces=[
+                #         {"value": 1, "color": "#ff7f74"},
+                #         {"value": -1, "color": "#67e384"},
+                #     ],
+                # ),
                 axispointer_opts=opts.AxisPointerOpts(
                     is_show=True,
                     link=[{"xAxisIndex": "all"}],
@@ -132,7 +132,7 @@ class Chart:
                 is_smooth=True,
                 is_hover_animation=False,
                 linestyle_opts=opts.LineStyleOpts(width=1.5, opacity=0.9),
-                label_opts=opts.LabelOpts(is_show=False),
+                label_opts=opts.LabelOpts(is_show=True),
                 itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[i]),
             )
             i += 1

@@ -7,3 +7,4 @@ config.json
 *.html
 *.out
 /bin/switch_conda_env.sh
+/.vscode/

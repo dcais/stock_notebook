@@ -3,7 +3,7 @@ import datetime
 from datetime import date
 
 
-class Account:
+class Dec:
     amount = 0
     df = None
 
