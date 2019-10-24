@@ -4,7 +4,7 @@ import json
 from .position_mgr import PositionMgr
 
 
-class PositionMgrAdsoc(PositionMgr):
+class PositionMgrTurtle(PositionMgr):
     stop_atr_factor = 2
     # df_i = None
 
@@ -12,7 +12,7 @@ class PositionMgrAdsoc(PositionMgr):
     max_buy_cnt = 4
 
     def __init__(self, account_risk=0.01, stop_atr_factor=2, max_buy_cnt=4):
-        super(PositionMgrAdsoc, self).__init__()
+        super(PositionMgrTurtle, self).__init__()
         self.stop_atr_factor = stop_atr_factor
         self.account_risk = account_risk
         self.max_buy_cnt = max_buy_cnt
@@ -66,9 +66,4 @@ class PositionMgrAdsoc(PositionMgr):
         return buy_amount
 
     def update_stop_price(self, series_today: pd.Series):
-        self.stop_price = self.unit_high_price - self.stop_atr_factor * series_today.ATR
-        if self.position_day >= 20 \
-                and series_today.MA17_trend < 0 \
-                and series_today.MA25_trend < 0 \
-                and series_today.MA17 < series_today.MA25:
-            self.stop_price = series_today.MA17
+        self.stop_price = self.unit_cost - self.stop_atr_factor * series_today.ATR

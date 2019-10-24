@@ -1,86 +1,108 @@
-import sys
-import concurrent.futures
-from os.path import abspath, join, dirname
-import pandas as pd
-sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
-
-from src.stock import Stock
-from src.strategy import FirstStrategy
 import src.log as log
-logging = log.init_log()
+import numpy as np
+from .strategy_turtle_55 import StrategyTurtle55
+from .position_mgr_turtle import PositionMgrTurtle
+from .chart import Chart
+from pyecharts import options as opts
 
-def get_blank_df():
-    return pd.DataFrame(
-        columns=['symbol', 'balance', 'balance_max', 'balance_min', 'profit', 'profit_max', 'profit_min'])
 
-
-def simulate(symbol):
-    logging.info("start simulate " + symbol)
-    stragety = FirstStrategy(stock, symbol, start_date="20090101")
-    df = stragety.simulate(start_date="20100101",
-                           init_amount=init_amount,
-                           max_add_count= max_add_cnt,
-                           stop_price_factor=stop_price_factor
-                           )
-
-    rdf = None
-    if df is not None:
-        balance = df.tail(1)['balance'][0]
-        balance_max = df.max()['balance']
-        balance_min = df.min()['balance']
-        profit = (balance - init_amount) / init_amount
-        profit_max = (balance_max - init_amount) / init_amount
-        profit_min = (balance_min - init_amount) / init_amount
-        df = get_blank_df()
-        rdf = df.append(
-            {'symbol': symbol,
-             'balance': balance,
-             'balance_max': balance_max,
-             'balance_min': balance_min,
-             'profit': profit,
-             'profit_max': profit_max,
-             'profit_min': profit_min
-             }, ignore_index=True)
-        # print("simulate %s finished, profit %f" % (symbol, profit))
-    else:
+def get_k_chart(stock_info, strategy_name, df_daily, df_position, df_trade_detail):
+    chart = Chart()
+    kdatas = np.array(df_daily.loc[:, ['open', 'close', 'low', 'high']])
+    vols = np.array(df_daily['vol'])
+    trade_dates = df_daily.trade_date.to_numpy()
+    ma_dic = {}
+    ma_periods = []
+    if strategy_name == 'turtle55':
+        ma_periods = [25, 350]
         pass
 
-    return rdf
+    tanqian_dic = None
+    for period in ma_periods:
+        name = 'MA' + str(period)
+        ma_dic[name] = {}
+        ma_dic[name]['name'] = name
+        ma_dic[name]['datas'] = df_daily[name].to_numpy().round(2).tolist()
+        tanqian_dic = {
+            'BUY_55_MAX': {
+                'name': 'BUY_55_MAX',
+                'datas': df_daily['max_55'].to_numpy().round(2).tolist()
+            },
+            'BUY_20_MIN': {
+                'name': 'BUY_20_MIN',
+                'datas': df_daily['min_20'].to_numpy().round(2).tolist()
+            }
+        }
+
+    bs = {
+    }
+
+    bs['buy'] = df_trade_detail.loc[df_trade_detail['trade_type'] == 'buy', ['trade_date', 'unit_price']]
+    bs['sell'] = df_trade_detail.loc[df_trade_detail['trade_type'] == 'sell', ['trade_date', 'unit_price']]
+
+    df_stop_price = df_position.loc[df_position['unit_account'] > 0, ['trade_date', 'stop_price']]
+
+    chart_k = chart.get_grid(
+        stock_info,
+        trade_dates.tolist(),
+        kdatas.tolist(),
+        vols.tolist(),
+        ma_dic=ma_dic,
+        tanqian_dic=tanqian_dic,
+        bs=bs,
+        df_stop_price=df_stop_price
+    )
+
+    turnover_chart = chart.get_empty()
+
+    chart_k.add(
+        turnover_chart,
+        grid_opts=opts.GridOpts(
+            pos_left="6%", pos_right="8%", pos_top="68%", height="7%"
+        ),
+    )
+    chart_k.add(
+        turnover_chart,
+        grid_opts=opts.GridOpts(
+            pos_left="6%", pos_right="8%", pos_top="75%", height="7%"
+        ),
+    )
+    return chart_k
 
 
-def simu_callback(future):
-    pass
+def get_account_chart(stock_info, df_account):
+    chart = Chart()
+    chart_account = chart.get_line_account(df_account, stock_info)
+    return chart_account
 
 
-if __name__ == '__main__':
-    stock = Stock()
-    init_amount = 100000
-    worker_cnt = 2
-    max_add_cnt = 4
-    stop_price_factor = 4
-    if len(sys.argv) >= 2:
-        worker_cnt = int(sys.argv[1])
-    if len(sys.argv) >=3:
-        max_add_cnt = int(sys.argv[2])
-    if len(sys.argv) >=4:
-        stop_price_factor = int(sys.argv[2])
-    print("worker count = %s, max add count %s, stop_price_factor %s" % (worker_cnt,max_add_cnt,stop_price_factor))
-    df = get_blank_df()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
-        ft_map = {executor.submit(simulate, row['symbol']): row['symbol'] for i, row in stock.stock_df.iterrows()}
-        for future in concurrent.futures.as_completed(ft_map):
-            symbol = ft_map[future]
-            try:
-                df_i = future.result()
-                if df_i is not None:
-                    logging.info("simulate %s finished, profit %f" % (symbol, df_i['profit'][0]))
-                    df = df.append(df_i)
-                else:
-                    logging.info("simulate %s finished, the result is None", symbol)
+def simulate(
+        keyword,
+        stock,
+        data_start_date:str,
+        simulate_start_date:str,
+        simulate_end_date='',
+        strategy_name=None,
+        excel_path=None,
+        with_chart = False
+):
+    stock_info = stock.get_stock_info(keyword)
+    df = stock.get_daily_data(stock_info['code'], data_start_date)
 
-            except Exception as exc:
-                logging.error('%s generated an exception: %s' % (symbol, exc))
-            else:
-                pass
+    if strategy_name == 'turtle55':
+        strategy = StrategyTurtle55(df)
+        positionMgr = PositionMgrTurtle()
 
-    df.to_excel("summary.xlsx")
+    result_dic = strategy.simulate(start_day=simulate_start_date, end_day=simulate_end_date, positionMgr=positionMgr,
+                                   excel_path=excel_path)
+
+    if with_chart:
+        chart_k = get_k_chart(stock_info, strategy_name, result_dic['daily_data'], result_dic['position'],
+                              result_dic['trade_detail'])
+        chart_account = get_account_chart(stock_info, result_dic['account'])
+        result_dic['chart'] = {
+            'k': chart_k,
+            'account': chart_account
+        }
+
+    return result_dic

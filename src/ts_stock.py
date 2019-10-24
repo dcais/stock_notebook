@@ -41,7 +41,9 @@ class TsStock:
             isIndex = True
         else:
             code_df = self.stock_df
-            if re.match(r'\d{6}', keyword):
+            if re.match(r'\d{6}\.', keyword):
+                code_df.index = code_df['ts_code']
+            elif re.match(r'\d{6}', keyword):
                 code_df.index = code_df['symbol']
             else:
                 code_df.index = code_df['name']

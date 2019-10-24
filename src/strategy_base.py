@@ -67,7 +67,15 @@ class StrategyBase:
         if excel_path is not None:
             self.write_excel(df=df, path=excel_path, account=account, positionMgr=positionMgr)
 
-        return df
+        return {
+            'daily_data': df,
+            'account': account.df,
+            'account_report': account.gen_report(),
+            'position': positionMgr.df,
+            'position_record': positionMgr.df_pos_record,
+            'position_report': positionMgr.gen_position_report(),
+            'trade_detail': positionMgr.trade_detail.df
+        }
 
     def write_excel(self, df: pd.DataFrame, path, account: Account, positionMgr: PositionMgr):
         writer = pd.ExcelWriter(path=path)

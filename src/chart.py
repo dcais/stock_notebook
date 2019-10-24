@@ -178,6 +178,34 @@ class Chart:
         line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
         return line
 
+    def get_tanqian(self, tanqian):
+        xdatas = tanqian['trade_date'].to_numpy().tolist()
+        line = Line()
+        line.add_xaxis(xaxis_data=xdatas)
+
+        line.add_yaxis(
+            series_name=tanqian['up']['name'],
+            y_axis=tanqian['up']['data'].to_numpy().round(2).tolist(),
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[20]),
+        )
+        line.add_yaxis(
+            series_name=tanqian['down']["name"],
+            y_axis=tanqian['down']['data'].to_numpy().round(2).tolist(),
+            symbol="none",
+            is_smooth=True,
+            is_hover_animation=False,
+            linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+            label_opts=opts.LabelOpts(is_show=False),
+            itemstyle_opts=opts.ItemStyleOpts(color=Chart.colors[22]),
+        )
+        line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
+        return line
+
     def get_volome(self, xdatas, vols, kdatas):
         bar = (
             Bar(init_opts=opts.InitOpts())
@@ -278,12 +306,17 @@ class Chart:
         )
         return esSar
 
-    def get_grid(self, stock_info, xdatas, kdatas, vols,
+    def get_grid(self,
+                 stock_info,
+                 xdatas,
+                 kdatas,
+                 vols,
                  ma_dic=None,
                  sar=None,
                  bs=None,
                  df_stop_price=None,
-                 bol= None
+                 bol= None,
+                 tanqian_dic = None
                  ):
         kline = self.get_kline(xdatas, kdatas, stock_info)
 
@@ -314,6 +347,10 @@ class Chart:
         if ma_dic is not None:
             line = self.get_line(xdatas, ma_dic)
             kline = kline.overlap(line)
+
+        if tanqian_dic is not None:
+            tanqian_line = self.get_line(xdatas,tanqian_dic)
+            kline.overlap(tanqian_line)
 
         grid_chart = Grid(
             init_opts=opts.InitOpts(
@@ -433,6 +470,74 @@ class Chart:
         )
         line.set_global_opts(xaxis_opts=opts.AxisOpts(type_="category"))
         return line
+
+    def get_line_account(self, df , stock_info):
+        trade_dates = np.array(df.trade_date).tolist()
+        c = (
+            Line()
+                .add_xaxis(trade_dates)
+                .add_yaxis("收益率"
+                           , df.profit_rate.to_numpy().tolist()
+                           , is_smooth=True,
+                           is_hover_animation=False,
+                           linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                           label_opts=opts.LabelOpts(is_show=False),
+                           )
+                .add_yaxis("回撤率"
+                           , df.fall_rate.to_numpy().tolist()
+                           , is_smooth=True,
+                           is_hover_animation=False,
+                           linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                           label_opts=opts.LabelOpts(is_show=False),
+                           )
+
+                .set_global_opts(
+                title_opts=opts.TitleOpts(title=stock_info['name']),
+                xaxis_opts=opts.AxisOpts(
+                    is_scale=True,
+                    type_="category",
+                    splitarea_opts=opts.SplitAreaOpts(
+                        is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+                    ),
+                ),
+                yaxis_opts=opts.AxisOpts(
+                    is_scale=True,
+                    splitarea_opts=opts.SplitAreaOpts(
+                        is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+                    ),
+                ),
+                datazoom_opts=[
+                    opts.DataZoomOpts(
+                        is_show=True,
+                        xaxis_index=[0],
+                        type_="slider",
+                        pos_top="90%",
+                        range_start=90,
+                        range_end=100,
+                    ),
+                    #                 opts.DataZoomOpts(
+                    #                     is_show=True,
+                    #                     yaxis_index=[0],
+                    #                     type_="slider",
+                    #                     orient = 'vertical',
+                    # #                     pos_top="90%",
+                    #                     pos_right="0%",
+                    #                     range_start=0,
+                    #                     range_end=100,
+                    #                 ),
+                ],
+                tooltip_opts=opts.TooltipOpts(
+                    trigger="axis",
+                    axis_pointer_type="cross",
+                    background_color="rgba(245, 245, 245, 0.8)",
+                    border_width=1,
+                    border_color="#ccc",
+                    textstyle_opts=opts.TextStyleOpts(color="#000"),
+                ),
+            )
+        )
+        return c
+
 
     def get_line_ba(self,df, init_account, stock_info):
         trade_dates = np.array(df.trade_date).tolist()
@@ -562,6 +667,10 @@ class Chart:
             )
         )
         return c
+
+    def get_empty(self):
+        line = Line()
+        return line
 
     def get_turnover_chart(self,df):
         xdatas = df.trade_date.to_numpy().tolist()
