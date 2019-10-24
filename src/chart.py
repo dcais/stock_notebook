@@ -473,6 +473,7 @@ class Chart:
 
     def get_line_account(self, df , stock_info):
         trade_dates = np.array(df.trade_date).tolist()
+        df['log_return_rate_mean'] = df.log_return_rate.mean() * 250
         c = (
             Line()
                 .add_xaxis(trade_dates)
@@ -491,6 +492,20 @@ class Chart:
                            label_opts=opts.LabelOpts(is_show=False),
                            )
 
+                .add_yaxis("闲置资金占比"
+                           , df.capital_av_rate.to_numpy().tolist()
+                           , is_smooth=True,
+                           is_hover_animation=False,
+                           linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                           label_opts=opts.LabelOpts(is_show=False),
+                           )
+                .add_yaxis("年化对数收益率"
+                           , df.log_return_rate_mean # * 250).to_numpy().tolist()
+                           , is_smooth=True,
+                           is_hover_animation=False,
+                           linestyle_opts=opts.LineStyleOpts(width=2, opacity=0.9),
+                           label_opts=opts.LabelOpts(is_show=False),
+                           )
                 .set_global_opts(
                 title_opts=opts.TitleOpts(title=stock_info['name']),
                 xaxis_opts=opts.AxisOpts(

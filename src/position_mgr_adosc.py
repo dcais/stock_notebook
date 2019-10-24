@@ -4,7 +4,7 @@ import json
 from .position_mgr import PositionMgr
 
 
-class PositionMgrAdsoc(PositionMgr):
+class PositionMgrAdosc(PositionMgr):
     stop_atr_factor = 2
     # df_i = None
 
@@ -12,7 +12,7 @@ class PositionMgrAdsoc(PositionMgr):
     max_buy_cnt = 4
 
     def __init__(self, account_risk=0.01, stop_atr_factor=2, max_buy_cnt=4):
-        super(PositionMgrAdsoc, self).__init__()
+        super(PositionMgrAdosc, self).__init__()
         self.stop_atr_factor = stop_atr_factor
         self.account_risk = account_risk
         self.max_buy_cnt = max_buy_cnt

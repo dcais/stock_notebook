@@ -15,9 +15,11 @@ class StrategyBase:
     def __init__(self,
                  df: pd.DataFrame,
                  data_lookback_window: int = 1,
+                 ctx:dict = {}
                  ):
         self.df = df
         self.data_lookback_window = data_lookback_window
+        self.ctx = ctx
         self.init_data(self.df)
         self.init_ctx(self.ctx)
         pass

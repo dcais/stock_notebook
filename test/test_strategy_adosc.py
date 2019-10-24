@@ -7,7 +7,7 @@ sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 
 from src.ts_stock import TsStock
 from src.strategy_adosc import StrategyAdosc
-from src.position_mgr_adsoc import PositionMgrAdsoc
+from src.position_mgr_adosc import PositionMgrAdosc
 
 # import
 
@@ -19,6 +19,6 @@ df = stock.get_daily_data(symbol, '20080101')
 
 strategy = StrategyAdosc(df)
 
-positionMgr = PositionMgrAdsoc(account_risk=0.01, stop_atr_factor=4, max_buy_cnt=4)
+positionMgr = PositionMgrAdosc(account_risk=0.01, stop_atr_factor=4, max_buy_cnt=4)
 
 strategy.simulate(start_day='20090101', positionMgr=positionMgr, excel_path='test_strategy_adsoc_' + symbol + '.xlsx');

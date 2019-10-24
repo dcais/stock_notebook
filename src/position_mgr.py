@@ -71,7 +71,12 @@ class PositionMgr:
     R = 0
     P_R = 0  # update when update called
 
-    def __init__(self):
+    dynamic_adjust_account_scale = False
+
+    def __init__(self,
+        dynamic_adjust_account_scale = False):
+
+        self.dynamic_adjust_account_scale = dynamic_adjust_account_scale
         self.df_pos_record = self.gen_pos_record()
         self.df = self.gen_new_df()
 
@@ -193,6 +198,8 @@ class PositionMgr:
         if trade_amount > 0:
             account.update(trade_date=trade_date, cash_change=trade_amount, positionMgr=self)
 
+        if self.dynamic_adjust_account_scale:
+            account.adjust_account_scale()
         return trade_amount
 
     def close_mng(self, trade_date: str, unit_price: float, account):
@@ -257,6 +264,12 @@ class PositionMgr:
         self.df_pos_record.to_excel(writer, sheet_name='position_record', index=False)
         self.gen_position_report().to_excel(writer, sheet_name='position_report', index=False)
         self.trade_detail.to_excel(writer)
+
+    def is_last_win(self):
+        if len(self.df_pos_record) == 0:
+            return False
+
+        return self.df_pos_record.tail(1).iloc[0]['W/L'] == 'W'
 
     def gen_position_report(self):
         # 交易次数

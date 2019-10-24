@@ -9,7 +9,7 @@ from .position_mgr import PositionMgr
 
 
 class Account:
-    amount = 0
+    init_amount = 0
     df = None
     trade_date = ''
     total_assets = 0
@@ -22,9 +22,10 @@ class Account:
     max_fall_date = 0
     fall_day = 0
     log_return_rate = 0
+    capital_av_rate = 0
 
     def __init__(self, init_amount: float = 100000):
-        self.amount = init_amount
+        self.init_amount = init_amount
         self.df = pd.DataFrame(
             columns=[
                 'trade_date',
@@ -36,7 +37,8 @@ class Account:
                 'profit_rate',
                 'fall_rate',
                 'fall_day',
-                'log_return_rate'
+                'log_return_rate',
+                'capital_av_rate'
             ])
         self.total_assets = init_amount
         self.cash_balance = init_amount
@@ -57,7 +59,9 @@ class Account:
              self.profit_rate,
              self.fall_rate,
              self.fall_day,
-             self.log_return_rate)
+             self.log_return_rate,
+             self.capital_av_rate
+             )
         ],
             columns=[
                 'trade_date',
@@ -69,7 +73,8 @@ class Account:
                 'profit_rate',
                 'fall_rate',
                 'fall_day',
-                'log_return_rate'
+                'log_return_rate',
+                'capital_av_rate'
             ])
         return df_i
 
@@ -92,7 +97,7 @@ class Account:
         max_total = max(max_total, self.total_assets)
 
         fall_rate = (self.total_assets - max_total) / max_total
-        profit_rate = (self.total_assets - self.account_scale) / self.account_scale
+        profit_rate = (self.total_assets - self.init_amount) / self.init_amount
 
         self.max_total = max_total
         self.fall_rate = fall_rate
@@ -112,8 +117,11 @@ class Account:
         else:
             self.fall_day = 0
 
+        self.capital_av_rate = self.cash_balance / self.account_scale
+
         df_i = self.gen_df_i(trade_date)
-        self.df = self.df.append(df_i, ignore_index=False)
+        self.df = self.df.append(df_i, ignore_index=False, sort= False)
+
         pass
 
     def get_cash_balance(self):
@@ -128,6 +136,9 @@ class Account:
 
     def get_account_scale(self):
         return self.account_scale
+
+    def adjust_account_scale(self):
+        self.account_scale = self.total_assets
 
     def gen_report(self):
         # 交易日
