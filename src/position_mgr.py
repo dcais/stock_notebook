@@ -53,7 +53,7 @@ class PositionMgr:
     df = None
     # df_i = None
     df_pos_record = None
-    trade_detail = TradeDetail()
+    trade_detail = None
 
     trade_date = ''
     position_key = 0
@@ -74,11 +74,12 @@ class PositionMgr:
     dynamic_adjust_account_scale = False
 
     def __init__(self,
-        dynamic_adjust_account_scale = False):
+                 dynamic_adjust_account_scale=False):
 
         self.dynamic_adjust_account_scale = dynamic_adjust_account_scale
         self.df_pos_record = self.gen_pos_record()
         self.df = self.gen_new_df()
+        self.trade_detail = TradeDetail()
 
     def gen_new_df(self):
         df = pd.DataFrame(
@@ -283,8 +284,8 @@ class PositionMgr:
                 win_rate
             )
         ],
-        columns=[
-          'trade_cnt',
-          'win_rate',
-        ])
+            columns=[
+                'trade_cnt',
+                'win_rate',
+            ])
         return df_i

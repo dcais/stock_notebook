@@ -11,48 +11,19 @@ from src.simulate import simulate
 from src.ts_stock import TsStock
 
 stock = TsStock()
-keyword = '002019'
-
-# strategy_ctx = {
-#     'long_period': 55,
-#     'short_period': 20,
-# }
-# strategy_name = 'turtle55'
-#
-# result = simulate(keyword, stock,
-#                   data_start_date='20020101',
-#                   simulate_start_date='20090101',
-#                   strategy_name=strategy_name,
-#                   strategy_ctx=strategy_ctx,
-#                   excel_path=join(outpath, 'test_simulate_' + strategy_name + '_' + keyword + '.xlsx'),
-#                   with_chart=True
-#                   )
-#
-# result['chart']['k'].render(join(outpath, 'test_simulate_' + strategy_name + '_k.html'))
-# result['chart']['account'].render(join(outpath, 'test_simulate_' + strategy_name + '_account.html'))
-#
-# strategy_name = 'adosc'
-# result = simulate(keyword, stock,
-#                   data_start_date='20020101',
-#                   simulate_start_date='20090101',
-#                   strategy_name=strategy_name,
-#                   strategy_ctx=strategy_ctx,
-#                   excel_path=join(outpath, 'test_simulate_' + strategy_name + '_' + keyword + '.xlsx'),
-#                   with_chart=True
-#                   )
-#
-# result['chart']['k'].render(join(outpath, 'test_simulate_' + strategy_name + '_k.html'))
-# result['chart']['account'].render(join(outpath, 'test_simulate_' + strategy_name + '_account.html'))
+keyword = '000963'
 
 strategy_ctx = {
-    'long_period': 20,
-    'short_period': 10,
+    'long_period': 55,
+    'short_period': 20,
 }
+strategy_name = 'turtle55'
+data_start_date = '20070101'
+simulate_start_date = '20080101'
 
-strategy_name = 'turtle20'
 result = simulate(keyword, stock,
-                  data_start_date='20020101',
-                  simulate_start_date='20090101',
+                  data_start_date=data_start_date,
+                  simulate_start_date=simulate_start_date,
                   strategy_name=strategy_name,
                   strategy_ctx=strategy_ctx,
                   excel_path=join(outpath, 'test_simulate_' + strategy_name + '_' + keyword + '.xlsx'),
@@ -61,3 +32,34 @@ result = simulate(keyword, stock,
 
 result['chart']['k'].render(join(outpath, 'test_simulate_' + strategy_name + '_k.html'))
 result['chart']['account'].render(join(outpath, 'test_simulate_' + strategy_name + '_account.html'))
+
+strategy_name = 'adosc'
+result = simulate(keyword, stock,
+                  data_start_date=data_start_date,
+                  simulate_start_date=simulate_start_date,
+                  strategy_name=strategy_name,
+                  strategy_ctx=strategy_ctx,
+                  excel_path=join(outpath, 'test_simulate_' + strategy_name + '_' + keyword + '.xlsx'),
+                  with_chart=True
+                  )
+
+result['chart']['k'].render(join(outpath, 'test_simulate_' + strategy_name + '_k.html'))
+result['chart']['account'].render(join(outpath, 'test_simulate_' + strategy_name + '_account.html'))
+#
+# strategy_ctx = {
+#     'long_period': 20,
+#     'short_period': 10,
+# }
+#
+# strategy_name = 'turtle20'
+# result = simulate(keyword, stock,
+#                   data_start_date=data_start_date,
+#                   simulate_start_date=simulate_start_date,
+#                   strategy_name=strategy_name,
+#                   strategy_ctx=strategy_ctx,
+#                   excel_path=join(outpath, 'test_simulate_' + strategy_name + '_' + keyword + '.xlsx'),
+#                   with_chart=True
+#                   )
+#
+# result['chart']['k'].render(join(outpath, 'test_simulate_' + strategy_name + '_k.html'))
+# result['chart']['account'].render(join(outpath, 'test_simulate_' + strategy_name + '_account.html'))
