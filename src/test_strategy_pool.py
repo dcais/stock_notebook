@@ -14,7 +14,7 @@ def get_strategy_pool():
             'short_period': 20,
             'max_hold_day': 80,
         },
-        'excel_name':'turtle_55_hold_80'
+        'excel_name': 'turtle_55_hold_80'
     })
     pool.append({
         'name': "turtle20",
