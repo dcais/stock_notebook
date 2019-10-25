@@ -15,7 +15,7 @@ stock = Stock()
 
 def get_stock_pool():
     # return ['000001.SZ','002019.SZ']
-    return stock.get_hs_300().ts_code.to_numpy().tolist()
+    return stock.get_sz_50().ts_code.to_numpy().tolist()
 
 if __name__ == '__main__':
     init_amount = 100000

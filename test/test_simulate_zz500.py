@@ -15,7 +15,10 @@ stock = Stock()
 
 def get_stock_pool():
     # return ['000001.SZ','002019.SZ']
-    return stock.get_hs_300().ts_code.to_numpy().tolist()
+    return stock.get_zz_500().ts_code.to_numpy().tolist()
+
+
+
 
 if __name__ == '__main__':
     init_amount = 100000
@@ -36,6 +39,6 @@ if __name__ == '__main__':
         stock_pool=stock_pool,
         data_start_date=data_start_date,
         simulate_start_date=simulate_start_date,
-        excel_path_pre = join(outpath, 'test_simulate_hs300'),
+        excel_path_pre = join(outpath, 'test_simulate_zz500'),
         worker_cnt = worker_cnt
     )
