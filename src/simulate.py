@@ -7,9 +7,19 @@ from .chart import Chart
 from .strategy_adosc import StrategyAdosc
 from .strategy_turtle_20 import StrategyTurtle20
 from pyecharts import options as opts
+from .strategy_ma_2 import StrategyMa2
+from .strategy_ma_3 import StrategyMa3
+from .position_mgr_ma import PositionMgrMa
 
 
-def get_k_chart(stock_info, strategy_name, df_daily, df_position, df_trade_detail):
+def get_k_chart(
+        stock_info,
+        strategy_name,
+        df_daily,
+        df_position,
+        df_trade_detail,
+        strategy_ctx:dict = {}
+):
     chart = Chart()
     kdatas = np.array(df_daily.loc[:, ['open', 'close', 'low', 'high']])
     vols = np.array(df_daily['vol'])
@@ -33,7 +43,33 @@ def get_k_chart(stock_info, strategy_name, df_daily, df_position, df_trade_detai
 
     elif strategy_name == 'adosc':
         ma_periods = [8, 17, 25, 99, 145, 318]
-
+    elif strategy_name == 'ma2':
+        period = strategy_ctx['short_period']
+        ma_dic['MA'+str(period)] = {
+            'name': 'MA'+str(period),
+            'datas': df_daily['ma_s'].to_numpy().round(2).tolist()
+        }
+        period = strategy_ctx['long_period']
+        ma_dic['MA' + str(period)] = {
+            'name': 'MA' + str(period),
+            'datas': df_daily['ma_l'].to_numpy().round(2).tolist()
+        }
+    elif strategy_name == 'ma3':
+        period = strategy_ctx['short_period']
+        ma_dic['MA'+str(period)] = {
+            'name': 'MA'+str(period),
+            'datas': df_daily['ma_s'].to_numpy().round(2).tolist()
+        }
+        period = strategy_ctx['mid_period']
+        ma_dic['MA' + str(period)] = {
+            'name': 'MA' + str(period),
+            'datas': df_daily['ma_m'].to_numpy().round(2).tolist()
+        }
+        period = strategy_ctx['long_period']
+        ma_dic['MA' + str(period)] = {
+            'name': 'MA' + str(period),
+            'datas': df_daily['ma_l'].to_numpy().round(2).tolist()
+        }
 
     for period in ma_periods:
         name = 'MA' + str(period)
@@ -111,14 +147,19 @@ def simulate(
     elif strategy_name == 'adosc':
         strategy = StrategyAdosc(df, ctx=strategy_ctx)
         positionMgr = PositionMgrAdosc()
-
+    elif strategy_name == 'ma2':
+        strategy = StrategyMa2(df, ctx=strategy_ctx)
+        positionMgr = PositionMgrMa()
+    elif strategy_name == 'ma3':
+        strategy = StrategyMa3(df, ctx=strategy_ctx)
+        positionMgr = PositionMgrMa()
 
     result_dic = strategy.simulate(start_day=simulate_start_date, end_day=simulate_end_date, positionMgr=positionMgr,
                                    excel_path=excel_path)
 
     if with_chart:
         chart_k = get_k_chart(stock_info, strategy_name, result_dic['daily_data'], result_dic['position'],
-                              result_dic['trade_detail'])
+                              result_dic['trade_detail'], strategy_ctx=strategy_ctx)
         chart_account = get_account_chart(stock_info, result_dic['account'])
         result_dic['chart'] = {
             'k': chart_k,

@@ -78,3 +78,8 @@ class StrategyTurtle55(StrategyBase):
         if positionMgr.unit_account > 0 and positionMgr.position_day > 0 and series_today.low < series_today.min_s:
             unit_price = min(series_today.min_s, series_today.high)
             positionMgr.close(trade_date=trade_day, unit_price=unit_price, account=account)
+
+        ctx_max_hold_day = ctx['max_hold_day'] if 'max_hold_day' in ctx else None
+        if ctx_max_hold_day is not None and ctx_max_hold_day > 0 and positionMgr.position_day > ctx['max_hold_day']:
+            unit_price = series_today.close
+            positionMgr.close(trade_date=trade_day, unit_price=unit_price, account=account)

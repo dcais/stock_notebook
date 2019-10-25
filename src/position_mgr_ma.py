@@ -4,24 +4,21 @@ import json
 from .position_mgr import PositionMgr
 
 
-class PositionMgrTurtle(PositionMgr):
+class PositionMgrMa(PositionMgr):
     stop_atr_factor = 2
     # df_i = None
 
     account_risk = 0.01
     max_buy_cnt = 4
 
-    def __init__(self, account_risk=0.01, stop_atr_factor=2, max_buy_cnt=4 ):
-        super(PositionMgrTurtle, self).__init__()
+    def __init__(self, account_risk=0.04, stop_atr_factor=2, max_buy_cnt=1 ):
+        super(PositionMgrMa, self).__init__()
         self.stop_atr_factor = stop_atr_factor
         self.account_risk = account_risk
         self.max_buy_cnt = max_buy_cnt
 
     def gen_add_prices(self, unit_price, atr):
-        for i in range(4):
-            factor = (i + 1) * 0.5
-            add_price = unit_price + (atr * factor)
-            self.add_prices.append(add_price)
+        return []
 
     def buy_mng(self, trade_date: str, unit_price: float, atr: float, account):
         if self.buy_cnt >= self.max_buy_cnt:

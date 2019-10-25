@@ -276,7 +276,9 @@ class PositionMgr:
         # 交易次数
         trade_cnt = len(self.df_pos_record)
         # 胜率
-        win_rate = len(self.df_pos_record.loc[self.df_pos_record['W/L'] == 'W']) / trade_cnt
+        win_rate = 0
+        if trade_cnt > 0:
+            win_rate = len(self.df_pos_record.loc[self.df_pos_record['W/L'] == 'W']) / trade_cnt
 
         df_i = pd.DataFrame([
             (
