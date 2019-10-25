@@ -10,6 +10,7 @@ from pyecharts import options as opts
 from .strategy_ma_2 import StrategyMa2
 from .strategy_ma_3 import StrategyMa3
 from .position_mgr_ma import PositionMgrMa
+from .position_mgr_turtle_trace_stop import PositionMgrTurtleTraceStop
 
 
 def get_k_chart(
@@ -28,7 +29,7 @@ def get_k_chart(
     ma_periods = []
 
     tanqian_dic = None
-    if strategy_name == 'turtle55' or strategy_name == 'turtle20':
+    if strategy_name == 'turtle55' or strategy_name == 'turtle20' or strategy_name == 'turtle55_trace_stop':
         ma_periods = [25, 350]
         tanqian_dic = {
             'max_l': {
@@ -141,6 +142,10 @@ def simulate(
     if strategy_name == 'turtle55':
         strategy = StrategyTurtle55(df, ctx=strategy_ctx)
         positionMgr = PositionMgrTurtle()
+    elif strategy_name == 'turtle55_trace_stop':
+        strategy_ctx['use_stop_price'] = True
+        strategy = StrategyTurtle55(df, ctx=strategy_ctx)
+        positionMgr = PositionMgrTurtleTraceStop()
     elif strategy_name == 'turtle20':
         strategy = StrategyTurtle20(df, ctx=strategy_ctx)
         positionMgr = PositionMgrTurtle()

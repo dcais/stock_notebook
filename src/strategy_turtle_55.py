@@ -71,9 +71,11 @@ class StrategyTurtle55(StrategyBase):
 
         stop_price = positionMgr.stop_price
 
-        # if positionMgr.unit_account > 0 and positionMgr.position_day > 0 and series_today.low < stop_price:
-        #     unit_price = min(stop_price, series_today.high)
-        #     positionMgr.close(trade_date=trade_day, unit_price=unit_price, account=account)
+        use_stop_price = ctx['use_stop_price'] if 'use_stop_price' in ctx else False
+
+        if positionMgr.unit_account > 0 and use_stop_price and positionMgr.position_day > 0 and series_today.low < stop_price:
+            unit_price = min(stop_price, series_today.high)
+            positionMgr.close(trade_date=trade_day, unit_price=unit_price, account=account)
 
         if positionMgr.unit_account > 0 and positionMgr.position_day > 0 and series_today.low < series_today.min_s:
             unit_price = min(series_today.min_s, series_today.high)

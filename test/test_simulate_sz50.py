@@ -10,6 +10,8 @@ outpath = join(dirpath, 'out')
 from src.stock import Stock
 from src.simulate_pool import run_simulate_pool
 from src.test_strategy_pool import get_strategy_pool
+from src.log import  init_log
+init_log()
 
 stock = Stock()
 
