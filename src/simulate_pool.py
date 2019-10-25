@@ -2,9 +2,7 @@ import sys
 import concurrent.futures
 from os.path import abspath, join, dirname
 import pandas as pd
-import logging
 
-logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S %p')
 sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 dirpath = join(abspath(dirname(__file__)), '..')
 outpath = join(dirpath, 'out')
@@ -13,6 +11,9 @@ from src.simulate import simulate
 from src.stock import Stock
 from src.strategy import FirstStrategy
 import pandas as pd
+from .log import init_log
+
+logging = init_log()
 
 stock = Stock()
 

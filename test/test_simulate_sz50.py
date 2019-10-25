@@ -2,7 +2,6 @@ import logging
 import sys
 from os.path import abspath, join, dirname
 
-logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S %p')
 sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 dirpath = join(abspath(dirname(__file__)), '..')
 outpath = join(dirpath, 'out')
@@ -11,7 +10,7 @@ from src.stock import Stock
 from src.simulate_pool import run_simulate_pool
 from src.test_strategy_pool import get_strategy_pool
 from src.log import  init_log
-init_log()
+logging = init_log()
 
 stock = Stock()
 
