@@ -50,6 +50,7 @@ class Stock:
         code = ''
         symbol = ''
         name = ''
+        isIndex = False
 
         code_df = self.stock_df
         if re.match(r'\d{6}\.', keyword):
@@ -66,6 +67,7 @@ class Stock:
             "code": code,
             "symbol": symbol,
             "name": name,
+            "is_index": isIndex
         }
 
     def get_daily_data(self, keyword, start_date='', end_date=''):

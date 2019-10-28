@@ -5,18 +5,22 @@ from os.path import abspath, join, dirname
 sys.path.insert(0, join(abspath(dirname(__file__)), '..'))
 from src.account import Account
 from src.position_mgr import PositionMgr
+from .log import init_log
+import logging
 
 
 class StrategyBase:
     df = None
     ctx = {}
     data_lookback_window = 1
+    log = None
 
     def __init__(self,
                  df: pd.DataFrame,
                  data_lookback_window: int = 1,
-                 ctx:dict = {}
+                 ctx: dict = {}
                  ):
+        self.log = init_log(logging.ERROR)
         self.df = df
         self.data_lookback_window = data_lookback_window
         self.ctx = ctx
@@ -57,14 +61,17 @@ class StrategyBase:
             account.day_start(trade_date=trade_date)
             positionMgr.day_start(trade_date=trade_date)
 
+            self.log.info('start_simu_day' + trade_date)
             self.run_strategy(trade_day=trade_date, df_day=df_data, account=account,
                               positionMgr=positionMgr, ctx=ctx)
+            self.log.info('end_simu_day' + trade_date)
 
             series_today = df_data.tail(1).iloc[0]
             positionMgr.update(series_today=series_today)
             account.update(trade_date=trade_date, cash_change=0, positionMgr=positionMgr)
             positionMgr.day_end(trade_date=trade_date)
             account.day_end(trade_date=trade_date)
+            self.log.info('update_day' + trade_date)
 
         if excel_path is not None:
             self.write_excel(df=df, path=excel_path, account=account, positionMgr=positionMgr)

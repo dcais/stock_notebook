@@ -135,9 +135,20 @@ def simulate(
         strategy_ctx = {},
         excel_path=None,
         with_chart = False,
+        init_amount = 1000000,
+        sina_realtime = None,
 ):
     stock_info = stock.get_stock_info(keyword)
-    df = stock.get_daily_data(stock_info['code'], data_start_date)
+    keyword = stock_info['code']
+    if stock_info['is_index']:
+        keyword = stock_info['name']
+
+    df = stock.get_daily_data(keyword, data_start_date)
+
+    if sina_realtime is not None:
+        df_rt = sina_realtime.get_realtime(stock_info['code'])
+        if df_rt.index[0] not in df.index:
+            df = df.append(df_rt, sort=False)
 
     if strategy_name == 'turtle55':
         strategy = StrategyTurtle55(df, ctx=strategy_ctx)
@@ -160,7 +171,7 @@ def simulate(
         positionMgr = PositionMgrMa()
 
     result_dic = strategy.simulate(start_day=simulate_start_date, end_day=simulate_end_date, positionMgr=positionMgr,
-                                   excel_path=excel_path)
+                                   excel_path=excel_path,init_amount=init_amount)
 
     if with_chart:
         chart_k = get_k_chart(stock_info, strategy_name, result_dic['daily_data'], result_dic['position'],

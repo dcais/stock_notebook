@@ -29,6 +29,7 @@ def run(
                       simulate_start_date=simulate_start_date,
                       strategy_name=strategy_name,
                       strategy_ctx=strategy_ctx,
+                      init_amount=1000000,
                       excel_path=join(outpath, 'test_simulate_' + strategy_savename + '_' + keyword + '.xlsx'),
                       with_chart=True
                       )
@@ -37,15 +38,15 @@ def run(
 
 
 if __name__ == '__main__':
-    keyword = '002153'
+    keyword = '603444'
     strategy_ctx = {
-        'short_period': 30,
-        'mid_period': 60,
-        'long_period': 90,
+        'short_period': 20,
+        # 'mid_period': 60,
+        'long_period': 55,
     }
-    strategy_name = 'ma3'
-    data_start_date = '20050101'
-    simulate_start_date = '20080101'
+    strategy_name = 'turtle55'
+    data_start_date = '20150101'
+    simulate_start_date = '20180101'
     strategy_conf = {
         'name': strategy_name,
         'ctx': strategy_ctx,
@@ -58,24 +59,6 @@ if __name__ == '__main__':
         simulate_start_date=simulate_start_date
     )
 
-    strategy_ctx = {
-        'short_period': 100,
-        'long_period': 350,
-    }
-    strategy_name = 'ma2'
-    data_start_date = '20050101'
-    simulate_start_date = '20080101'
-    strategy_conf = {
-        'name': strategy_name,
-        'ctx': strategy_ctx,
-
-    }
-    run(
-        keyword=keyword,
-        strategy_conf=strategy_conf,
-        data_start_date=data_start_date,
-        simulate_start_date=simulate_start_date
-    )
 
 
 # strategy_name = 'adosc'

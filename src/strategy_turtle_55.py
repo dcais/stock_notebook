@@ -33,11 +33,11 @@ class StrategyTurtle55(StrategyBase):
         pass
 
     def before_run(self, df: pd.DataFrame):
-        cond_signal_open = df.high > df.max_l
-        df.loc[cond_signal_open , ['signal']] = 'open'
+        cond_signal_open = (df.high > df.max_l) #& (df.MA25 > df.MA350)
+        df.loc[cond_signal_open, ['signal']] = 'open'
 
         cond_signal_close = df.low < df.min_s
-        df.loc[cond_signal_close , ['signal']] = 'close'
+        df.loc[cond_signal_close, ['signal']] = 'close'
         pass
 
     def run_strategy(self, trade_day, df_day: pd.DataFrame, account: Account, positionMgr: PositionMgr,
@@ -47,7 +47,7 @@ class StrategyTurtle55(StrategyBase):
         series_yes = df_day.iloc[len_df_day - 2]
 
         if positionMgr.is_unit_empty() and series_today.signal == 'open':
-            unit_price = max( series_today.max_l, series_today.low)
+            unit_price = max(series_today.max_l, series_today.low)
             positionMgr.buy(trade_date=trade_day, unit_price=unit_price, atr=series_yes.ATR, account=account)
 
         add_prices = positionMgr.add_prices
