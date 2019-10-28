@@ -37,6 +37,6 @@ if __name__ == '__main__':
         data_start_date=data_start_date,
         simulate_start_date=simulate_start_date,
         simulate_end_date= '',
-        excel_path_pre = join(outpath, 'test_simulate_hs300'),
+        excel_path_pre = join(outpath, 'test_simulate_mine'),
         worker_cnt = worker_cnt
     )

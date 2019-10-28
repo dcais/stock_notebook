@@ -61,17 +61,17 @@ class StrategyBase:
             account.day_start(trade_date=trade_date)
             positionMgr.day_start(trade_date=trade_date)
 
-            self.log.info('start_simu_day' + trade_date)
+            # self.log.info('start_simu_day' + trade_date)
             self.run_strategy(trade_day=trade_date, df_day=df_data, account=account,
                               positionMgr=positionMgr, ctx=ctx)
-            self.log.info('end_simu_day' + trade_date)
+            # self.log.info('end_simu_day' + trade_date)
 
             series_today = df_data.tail(1).iloc[0]
             positionMgr.update(series_today=series_today)
             account.update(trade_date=trade_date, cash_change=0, positionMgr=positionMgr)
             positionMgr.day_end(trade_date=trade_date)
             account.day_end(trade_date=trade_date)
-            self.log.info('update_day' + trade_date)
+            # self.log.info('update_day' + trade_date)
 
         if excel_path is not None:
             self.write_excel(df=df, path=excel_path, account=account, positionMgr=positionMgr)
