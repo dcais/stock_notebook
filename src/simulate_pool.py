@@ -24,8 +24,9 @@ def simulate_one(param):
     simulate_end_date = param['simulate_end_date']
     strategy_name = param['strategy_name']
     strategy_ctx = param['strategy_ctx']
+    ts_code = param['ts_code']
 
-    result = simulate(param['ts_code'], stock,
+    result = simulate(ts_code, stock,
                       data_start_date=data_start_date,
                       simulate_start_date=simulate_start_date,
                       simulate_end_date=simulate_end_date,
@@ -33,11 +34,19 @@ def simulate_one(param):
                       strategy_ctx=strategy_ctx,
                       )
     account = result['account'].tail(1)
+    last_day_data = result['daily_data'].tail(1)
+    last_position = result['position'].tail(1)
     account_report = result['account_report']
     account = pd.concat([account, account_report], axis=1)
-    account['ts_code'] = param['ts_code']
+    account['ts_code'] = ts_code
+    last_day_data['ts_code'] = ts_code
+    last_position['ts_code'] = ts_code
     account = account.loc[:, ~account.columns.duplicated()]
-    return account
+    return {
+        'account':account,
+        'daily_data':last_day_data,
+        'position': last_position
+    }
 
 
 def run_simulate(
@@ -52,7 +61,9 @@ def run_simulate(
         excel_path=''
 
 ):
-    df: pd.DataFrame = None
+    df_account: pd.DataFrame = None
+    df_daily: pd.DataFrame = None
+    df_position: pd.DataFrame = None
     print("worker count = %s" % worker_cnt)
     with concurrent.futures.ProcessPoolExecutor(max_workers=worker_cnt) as executor:
         arr1 = ['hello', 'world']
@@ -71,29 +82,42 @@ def run_simulate(
         for future in concurrent.futures.as_completed(ft_map):
             ts_code = ft_map[future]
             try:
-                df_i = future.result()
-                if df is None:
-                    df = df_i.copy()
+                dic_result = future.result()
+                if dic_result is None:
+                    logging.info("simulate %s %s finished, the result is None", ts_code, strategy_name)
                 else:
-                    if df_i is not None:
-                        logging.info("simulate %s %s finished, profit %f" % (ts_code, strategy_name, df_i.profit_rate[0]))
-                        df = df.append(df_i)
+                    df_i_account = dic_result['account']
+                    df_i_daily = dic_result['daily_data']
+                    df_i_position = dic_result['position']
+                    if df_account is None:
+                        df_account = df_i_account.copy()
                     else:
-                        logging.info("simulate %s %s finished, the result is None", ts_code,strategy_name)
+                        logging.info("simulate %s %s finished, profit %f" % (ts_code, strategy_name, df_i_account.profit_rate[0]))
+                        df_account = df_account.append(df_i_account,ignore_index=True)
+
+                    if df_daily is None:
+                        df_daily = df_i_daily.copy()
+                    else:
+                        df_daily = df_daily.append(df_i_daily, ignore_index=True)
+
+                    if df_position is None:
+                        df_position = df_i_position.copy()
+                    else:
+                        df_position = df_position.append(df_i_position,ignore_index=True)
 
             except Exception as exc:
                 logging.error('%s %s generated an exception: %s' % (ts_code,strategy_name, exc))
             else:
                 pass
-    fall_rate_max = df.fall_rate.min()
+    fall_rate_max = df_account.fall_rate.min()
 
-    profit_rate_max = df.profit_rate.max()
-    profit_rate_mean = df.profit_rate.mean()
-    profit_rate_std = df.profit_rate.std()
+    profit_rate_max = df_account.profit_rate.max()
+    profit_rate_mean = df_account.profit_rate.mean()
+    profit_rate_std = df_account.profit_rate.std()
 
-    year_log_return_rate_max = df.year_log_return_rate.max()
-    year_log_return_rate_mean = df.year_log_return_rate.mean()
-    year_log_return_rate_std = df.year_log_return_rate.std()
+    year_log_return_rate_max = df_account.year_log_return_rate.max()
+    year_log_return_rate_mean = df_account.year_log_return_rate.mean()
+    year_log_return_rate_std = df_account.year_log_return_rate.std()
 
     df_report = pd.DataFrame([
         (
@@ -118,8 +142,10 @@ def run_simulate(
 
     path = excel_path
     writer = pd.ExcelWriter(path=path)
-    df.to_excel(writer, sheet_name='detail')
+    df_account.to_excel(writer, sheet_name='detail')
+    df_daily.to_excel(writer, sheet_name='last_day')
     df_report.to_excel(writer, sheet_name='report')
+    df_position.to_excel(writer, sheet_name='position')
     writer.save()
 
 
